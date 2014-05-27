@@ -1,4 +1,4 @@
-package de.passau.uni.sec.compose.pdp.servioticy.exception;
+package de.passau.uni.sec.compose.pdp.servioticy;
 
 public class PermissionCacheObject
 {

@@ -2,9 +2,9 @@ package start;
 
 
 
-import de.passau.uni.sec.compose.pdp.servioticy.PDPServioticyException;
-import de.passau.uni.sec.compose.pdp.servioticy.exception.LocalPDP;
-import de.passau.uni.sec.compose.pdp.servioticy.exception.PDP;
+import de.passau.uni.sec.compose.pdp.servioticy.LocalPDP;
+import de.passau.uni.sec.compose.pdp.servioticy.PDP;
+import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 
 public class PDPCall {
   public static void main(String[] args) {

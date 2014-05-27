@@ -1,4 +1,4 @@
-package de.passau.uni.sec.compose.pdp.servioticy;
+package de.passau.uni.sec.compose.pdp.servioticy.exception;
 
 
 public class PDPServioticyException extends Exception

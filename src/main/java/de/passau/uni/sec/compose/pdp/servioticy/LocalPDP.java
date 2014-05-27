@@ -1,7 +1,7 @@
-package de.passau.uni.sec.compose.pdp.servioticy.exception;
+package de.passau.uni.sec.compose.pdp.servioticy;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.passau.uni.sec.compose.pdp.servioticy.PDPServioticyException;
+import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 
 public class LocalPDP implements PDP
 {
