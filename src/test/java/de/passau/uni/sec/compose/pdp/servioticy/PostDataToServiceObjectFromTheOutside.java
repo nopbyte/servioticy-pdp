@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 
@@ -28,13 +27,7 @@ public class PostDataToServiceObjectFromTheOutside
 	 @Test
 	 public  void postDataToSOCallCorrect() throws PDPServioticyException
 	 {
-		    /*
-		     * this.id = so.getId();
-		this.api_token = so.getApiToken();
-		this.owner_id = so.getOwner().getId();
-		this.lastModified = so.getLastModified();
-		     */
-		//create ObjectMapper instance
+		  
 			try {
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadata(token);
@@ -49,6 +42,13 @@ public class PostDataToServiceObjectFromTheOutside
 		  
 			
 	 }
+	 /**
+	  * 
+	  * @param token
+	  * @return A subset of 
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
 	 private JsonNode buildJsonSoMetadata(String token) throws JsonProcessingException, IOException {
 		     String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\"}";
 		    ObjectMapper mapper = new ObjectMapper();
