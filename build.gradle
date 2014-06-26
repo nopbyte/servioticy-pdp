@@ -21,6 +21,7 @@ dependencies {
      compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.0'
      compile 'com.fasterxml.jackson.core:jackson-databind:2.3.'
     
+     compile 'org.apache.httpcomponents:httpclient:4.3.1'
      //test
      testCompile 'org.springframework:spring-test:3.2.3.RELEASE'
      testCompile 'junit:junit:4.10'
@@ -31,8 +32,12 @@ dependencies {
 }
 // end::dependencies[]
 
+test{
+ exclude 'de/passau/uni/sec/compose/pdp/servioticy/idm/TestIDMCommunicator**'
+}
 // tag::wrapper[]
 task wrapper(type: Wrapper) {
     gradleVersion = '1.11'
 }
 // end::wrapper[]
+
