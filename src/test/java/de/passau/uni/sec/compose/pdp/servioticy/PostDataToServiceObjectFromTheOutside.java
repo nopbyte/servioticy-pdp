@@ -69,6 +69,7 @@ public class PostDataToServiceObjectFromTheOutside
 		    }
 		    catch (PDPServioticyException e) 
 			{
+		    	System.out.println("User message: "+ e.getMessage()+",  log message: "+e.getLogInfo()+ ",HTTP error code: "+e.getStatus());
 				assertTrue(true);
 			} catch (JsonProcessingException e) {
 				// TODO Auto-generated catch block
