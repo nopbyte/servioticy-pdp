@@ -20,6 +20,7 @@ dependencies {
      compile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
      compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.0'
      compile 'com.fasterxml.jackson.core:jackson-databind:2.3.'
+     compile 'com.jayway.jsonpath:json-path:0.9.1'
     
      compile 'org.apache.httpcomponents:httpclient:4.3.1'
      //test

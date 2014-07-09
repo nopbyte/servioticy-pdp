@@ -11,9 +11,10 @@ public interface PDP
 		RetrieveServiceObjectDescription,
 		RetrieveServiceObjectStreamsDescription,
 		RetrieveServiceObjectData, //checkPermission
-		SendDataToServiceObject, //checkAuthorizationWO 
-		CreateNewSubscription,	
-		GetExistingSubscriptionsForStream,
+		SendDataToServiceObject, //checkAuthorizationWO
+		SendDataToServiceObjectProv, //initial provenance
+		CreateNewSubscription,
+		GetExistingSubscriptionsForStream, 
 		DispatchData//checkAuthorizationDispatch 
 	}
 
