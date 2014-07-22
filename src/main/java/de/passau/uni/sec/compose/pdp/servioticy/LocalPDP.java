@@ -50,7 +50,7 @@ public class LocalPDP implements PDP
 		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
 		{
 		    AuthorizationServioticy authz= new AuthorizationServioticy();
-		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, token, this.idmHost, this.idmPassword, idmPort);
+		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		}
 		return null;
 	}
