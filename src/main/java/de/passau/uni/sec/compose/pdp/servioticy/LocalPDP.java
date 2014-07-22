@@ -1,6 +1,7 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IdentityVerifier;
 import de.passau.uni.sec.compose.pdp.servioticy.provenance.ServioticyProvenance;
@@ -11,6 +12,8 @@ public class LocalPDP implements PDP
 	private IdentityVerifier id;
 	
 	private String idmHost;
+	
+	private int idmPort;
 	
 	private String idmUser;
 	
@@ -46,8 +49,8 @@ public class LocalPDP implements PDP
 		}
 		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
 		{
-			
-			
+		    AuthorizationServioticy authz= new AuthorizationServioticy();
+		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, token, token, this.idmPassword, idmPort);
 		}
 		return null;
 	}
@@ -82,6 +85,14 @@ public class LocalPDP implements PDP
 
 	public void setIdmPassword(String idmPassword) {
 		this.idmPassword = idmPassword;
+	}
+
+	public int getIdmPort() {
+		return idmPort;
+	}
+
+	public void setIdmPort(int idmPort) {
+		this.idmPort = idmPort;
 	}
 	
 	

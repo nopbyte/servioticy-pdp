@@ -39,6 +39,9 @@ public interface PDP
 	public void setIdmUser(String idmUser);
 	public String getIdmPassword();
 	public void setIdmPassword(String idmPassword);
+	public int getIdmPort();
+	public void setIdmPort(int idmPort);
+
 
 }
 
