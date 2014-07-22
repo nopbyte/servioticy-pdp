@@ -1,19 +1,16 @@
 package de.passau.uni.sec.compose.pdp.servioticy.authz;
 
 
-import static org.junit.Assert.fail;
+
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
-import de.passau.uni.sec.compose.pdp.servioticy.PDP.operationID;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IDMCommunicator;
 
