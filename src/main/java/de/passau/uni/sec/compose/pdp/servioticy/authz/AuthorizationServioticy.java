@@ -23,7 +23,9 @@ public class AuthorizationServioticy
 		
 	 	 PermissionCacheObject obj = null;
 	 	 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
-	 	 
+	 	 if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0)
+	 		throw new PDPServioticyException(500, "Not enough parameters to talk to the IDM ", "Not enough parameters to talk to IDM");
+			
 	 	 
 	 	
 			 CloseableHttpResponse response = com.sendGetToIDM("/idm/serviceobject/api_token_data/140602741741204bab8aeda86472fbfab310445341516");
