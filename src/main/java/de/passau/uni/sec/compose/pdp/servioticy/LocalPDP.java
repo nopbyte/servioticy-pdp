@@ -10,6 +10,12 @@ public class LocalPDP implements PDP
 
 	private IdentityVerifier id;
 	
+	private String idmHost;
+	
+	private String idmUser;
+	
+	private String idmPassword;
+	
 	public LocalPDP()
 	{
 		id = new IdentityVerifier();
@@ -38,8 +44,47 @@ public class LocalPDP implements PDP
 			}
 			return ret;	
 		}
+		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
+		{
+			
+			
+		}
 		return null;
 	}
+
+	public IdentityVerifier getId() {
+		return id;
+	}
+
+	public void setId(IdentityVerifier id) {
+		this.id = id;
+	}
+
+	public String getIdmHost() {
+		return idmHost;
+	}
+
+	public void setIdmHost(String idmHost) {
+		this.idmHost = idmHost;
+	}
+
+	public String getIdmUser() {
+		return idmUser;
+	}
+
+	public void setIdmUser(String idmUser) {
+		this.idmUser = idmUser;
+	}
+
+	public String getIdmPassword() {
+		return idmPassword;
+	}
+
+	public void setIdmPassword(String idmPassword) {
+		this.idmPassword = idmPassword;
+	}
+	
+	
 	
 	
 }

@@ -32,4 +32,13 @@ public interface PDP
 			JsonNode security_metadata_of_the_SU,
 			PermissionCacheObject cache,
 			 operationID opId) throws PDPServioticyException;
+
+	public String getIdmHost();
+	public void setIdmHost(String idmHost);
+	public String getIdmUser();
+	public void setIdmUser(String idmUser);
+	public String getIdmPassword();
+	public void setIdmPassword(String idmPassword);
+
 }
+
