@@ -52,6 +52,11 @@ public class LocalPDP implements PDP
 		    AuthorizationServioticy authz= new AuthorizationServioticy();
 		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		}
+		else if (opId.equals(PDP.operationID.DispatchData))
+		{
+		    AuthorizationServioticy authz= new AuthorizationServioticy();
+		    return authz.verifyGetDataDispatch(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		}
 		return null;
 	}
 
