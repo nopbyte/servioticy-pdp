@@ -24,6 +24,27 @@ public class TestIDMCommunicator
 		  com = new IDMCommunicator("composecontroller", "composecontrollerpassword", "localhost", 8080);
 	 }
 	 
+	 @Test
+	 public void getDataFromUserToken()
+	 {
+		 
+		 try{
+			 
+			 
+			 String access_token_user = "eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJjZmI0OGU0Yi0yOTE5LTQzYWYtYmQ2NS05MGM3MDYzY2Y4MGQiLCJzdWIiOiI4ZTMyMTU3Yi02YjVkLTQzZmUtYTBlOS0zMDQ4MjM2ZmJhOTAiLCJzY29wZSI6WyJzY2ltLnVzZXJpZHMiLCJwYXNzd29yZC53cml0ZSIsImNsb3VkX2NvbnRyb2xsZXIud3JpdGUiLCJvcGVuaWQiLCJjbG91ZF9jb250cm9sbGVyLnJlYWQiXSwiY2xpZW50X2lkIjoidm1jIiwiY2lkIjoidm1jIiwidXNlcl9pZCI6IjhlMzIxNTdiLTZiNWQtNDNmZS1hMGU5LTMwNDgyMzZmYmE5MCIsInVzZXJfbmFtZSI6InRlc3Q1IiwiZW1haWwiOiJ0ZXN0NUBjb21wb3NlLmNvbSIsImlhdCI6MTQwNjg4NTUyNCwiZXhwIjoxNDA2OTI4NzI0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiYXVkIjpbInNjaW0iLCJvcGVuaWQiLCJjbG91ZF9jb250cm9sbGVyIiwicGFzc3dvcmQiXX0.d3VXtEI-DjCMF4d0XdtmU9mAxVQI24ZKHvfTMWtN4FlYuTak7vtG_xa95sO3HMUDrx3GwRjKGJn6NpNaviGYsaPOry0DmyMrZ-2PbfVZ3smlW6moguBAl7OUXT2u6SwqS0-2uiAxKA4RS791d8DKO2_6nYjivr_tlRbghr_Vs8LKJgitR88yWmIy_fNWQ7zPGlEyzKfdaTrs_aw3EqYIx9xz2uyNYMAmfdVArIdu1BHX3yYgCp9rGCzARXWW0UT-X2JXxQ97DRV7KGHbpvJ9UjZqWukjp1xm5-i3bPy2UiJBIMF-1ktszmsF-8NcfCDLs9UPhoB70oX3whHK4fPTwQ"; 
+			
+		 //add the bearer key word.
+			 String response = com.getInformationForUser(access_token_user);
+			 System.out.println(response);
+		 }
+		 catch(PDPServioticyException e)
+		 {
+			 //TODO handle:
+			 fail();
+			 System.out.println("User message: "+e.getMessage()+" Status: "+e.getStatus()+" Logging info: "+e.getLogInfo());
+		 }
+
+	 }
 	 
 	 @Test
 	 public void createSO()
