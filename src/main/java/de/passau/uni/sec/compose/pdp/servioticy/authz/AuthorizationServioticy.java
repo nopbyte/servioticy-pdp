@@ -20,7 +20,7 @@ import de.passau.uni.sec.compose.pdp.servioticy.idm.IDMCommunicator;
 
 public class AuthorizationServioticy 
 {
-	private static final String IDM_USER_SECTION = "username";
+	private static final String IDM_USER_SECTION = "id";
 
 
 	/**
@@ -76,13 +76,13 @@ public class AuthorizationServioticy
 		} catch (JsonProcessingException e1) {
 			if (usedCacheObject == true){
 				cache.setCache(null);
-				verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
+				return verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
 			}
 			user_data = null;
 		} catch (IOException e1) {
 			if (usedCacheObject == true){
 				cache.setCache(null);
-				verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
+				return verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
 			}
 			user_data = null;
 		}
