@@ -15,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
@@ -118,6 +119,20 @@ public class AuthorizationServioticy
 
 			boolean evaluation = evaluatePolicy(security_metadata_SO_destination, security_metadata_of_the_SU);
 			obj.setPermission(evaluation);
+	    	// Build Security Meta-Data
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+	    	ObjectMapper mapper = new ObjectMapper();
+	    	//ObjectNode node =  mapper.getNodeFactory().objectNode();
+	    	ObjectNode securityData = mapper.getNodeFactory().objectNode();
+	    	JsonNode policies = security_metadata_SO_destination.findPath("policy");
+	    	if (policies !=  null){
+		    	securityData.put("policy", policies);
+		    	//node.put("security", securityData);
+		    }
+	    	JsonNode securityNode = securityData;
+	    	tempMapCache.put("SecurityMetaData", securityNode);
+	    	obj.setCache(tempMapCache);
+			
 			return obj;
 
 				

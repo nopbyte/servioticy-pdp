@@ -208,6 +208,32 @@ public class TestDefaultPolicy
 			
 	 }
 
+	 
+	 @Test
+	 public  void dispatchReturnMetaData() throws PDPServioticyException
+	 {
+		  	PermissionCacheObject ret;
+			try {
+				// Generate input
+				String token=UUID.randomUUID().toString();
+				JsonNode so_data = buildJsonSoMetadataPublic(token);
+				JsonNode su_data = buildJsonSuMetadataPublic();
+				// Get initial provenance
+				ret = pdp.checkAuthorization(token, so_data, su_data, null, PDP.operationID.DispatchData);
+				// Check the result of the policy evaluation
+				boolean pdpResult = ret.isPermission();
+				assertEquals(true, pdpResult);
+				assertEquals(so_data.findValue("policy"), ret.getSecurityMetaData().findValue("policy"));
+			} catch (PDPServioticyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				fail();
+			} catch (IOException e) {
+				fail();
+			}
+  
+			
+	 }
 
 
 	 /**
