@@ -32,11 +32,14 @@ public class LocalPDP implements PDP
 		
 		if(opId.equals(PDP.operationID.SendDataToServiceObject)) 
 		{
-			//TODO complete
-			id.verifyWebTokenApiToken(security_metadata_SO_current, token);
+			// Checks the token and returns the security meta-data
+			PermissionCacheObject ret = new PermissionCacheObject();
+			ret.setCache(id.verifyWebTokenApiToken(security_metadata_SO_current, token));
+			return ret;
 		}
 		else if (opId.equals(PDP.operationID.SendDataToServiceObjectProv)) // Initial provenance
-		{
+		{ 
+			//TODO Token not used
 			PermissionCacheObject ret = new PermissionCacheObject();
 			// Get initial Provenance
 			try{
@@ -49,6 +52,7 @@ public class LocalPDP implements PDP
 		}
 		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
 		{
+		    //TODO SO not used
 		    // Check policy (check parameters SU and authentikation token?) do the stuff with the cach object
 		    AuthorizationServioticy authz = new AuthorizationServioticy();
 		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);

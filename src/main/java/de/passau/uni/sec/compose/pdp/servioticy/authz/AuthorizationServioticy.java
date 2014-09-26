@@ -4,7 +4,9 @@ package de.passau.uni.sec.compose.pdp.servioticy.authz;
 
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.lang.String;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,8 +41,8 @@ public class AuthorizationServioticy
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
-
-		boolean usedCacheObject = false;
+		
+		Map<String, Object> tempMapCache = new HashMap<String, Object>();
 
 		// Check if parameters to connect to IDM exist
 	 	 PermissionCacheObject obj = new PermissionCacheObject();
@@ -49,49 +51,41 @@ public class AuthorizationServioticy
 		 }
 		
 		 // Connect to IDM if no information is in the cach object
-		 String response = null;
+		 String response = "";
 		 if (cache.getCache() == null) {		
 		 	 // Check if user is allowed to get data from the SO
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
-				 cache.setCache(response);
 			 }
 			 catch (PDPServioticyException e){
 				 obj.setPermission(false);
 				 obj.setCache(e);
 				 return obj;
 			 }
+			// Parse response
+		    ObjectMapper mapperUser = new ObjectMapper();
+		    JsonNode user_data = null;
+			try {
+				user_data = mapperUser.readTree(response);
+			} catch (JsonProcessingException e1) {
+				user_data = null;
+			} catch (IOException e1) {
+				user_data = null;
+			}
+			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
+			tempMapCache.put("UserId", userSO.toString());
+			cache.setCache(tempMapCache);
+			
 		 }
-		 else {
-			usedCacheObject = true;
-			response = cache.getCache().toString();
-		}
-		 // Check if response is correct (including exceptions		 
-	 	 // Build a JsonNode
-	    	ObjectMapper mapperUser = new ObjectMapper();
-	    	JsonNode user_data = null;
-		try {
-			user_data = mapperUser.readTree(response);
-		} catch (JsonProcessingException e1) {
-			if (usedCacheObject == true){
-				cache.setCache(null);
-				return verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
-			}
-			user_data = null;
-		} catch (IOException e1) {
-			if (usedCacheObject == true){
-				cache.setCache(null);
-				return verifyGetData(access_token_user, security_metadata_SO_current, security_metadata_of_the_SU, cache, idmHost, idmUser, idmPass, idmPort);
-			}
-			user_data = null;
-		}
-		
-		// Check policies
-		JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
-		boolean poleval = evaluatePolicy(security_metadata_of_the_SU, userSO.asText());
+		 
 
+		// Check policies
+		boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
+		// Set cache
+		 //tempMap.put("UserMetaData", response);
 		obj.setPermission(poleval);
+		obj.setCache(cache.getCache());
 		return obj;				
 	}
 

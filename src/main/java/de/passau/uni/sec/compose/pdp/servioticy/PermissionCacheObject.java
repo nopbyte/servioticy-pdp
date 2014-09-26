@@ -1,5 +1,8 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PermissionCacheObject
 {
 	private boolean permission =false;
@@ -16,6 +19,11 @@ public class PermissionCacheObject
 	public void setCache(Object cache) {
 		this.cache = cache;
 	}
-	
+	public String getUserId()
+	{
+		Map temp = (Map<String, Object>)this.cache;
+		String ret = (String) temp.get("UserId");
+		return ret;
+	}
 	
 }

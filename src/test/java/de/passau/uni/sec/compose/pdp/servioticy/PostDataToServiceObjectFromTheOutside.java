@@ -79,4 +79,41 @@ public class PostDataToServiceObjectFromTheOutside
 			}
 			
 	 }
+	
+	
+	 /**
+	  * 
+	  * @param token
+	  * @return A subset of 
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
+	 private JsonNode buildJsonSoMetadataWithPolicy(String token) throws JsonProcessingException, IOException {
+		     String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" : [{\"flow\" : { \"forall\" : \"entities\", \"target\" : \"entities\" }},{\"flow\" : { \"forall\" : \"entities\", \"source\" : \"entities\" }}]}";
+		    ObjectMapper mapper = new ObjectMapper();
+		    JsonNode so_data;
+			so_data = mapper.readTree(string);
+			return so_data;
+	}
+	@Test
+	 public  void postDataToSOcheckReturnedData() throws PDPServioticyException
+	 {
+		PermissionCacheObject ret = null;
+		JsonNode so_data = null;
+		try {
+			String token=UUID.randomUUID().toString();
+			so_data = buildJsonSoMetadataWithPolicy(token);
+			ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObject);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			fail();
+		}
+		JsonNode retNode = (JsonNode) ret.getCache();
+		//assertEquals(so_data.findValue("policy"), retNode.findValue("policy"));	
+	 }
 }
+
+
+
