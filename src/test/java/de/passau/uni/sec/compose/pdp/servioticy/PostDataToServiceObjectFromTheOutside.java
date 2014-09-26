@@ -110,8 +110,8 @@ public class PostDataToServiceObjectFromTheOutside
 		} catch (IOException e) {
 			fail();
 		}
-		JsonNode retNode = (JsonNode) ret.getCache();
-		//assertEquals(so_data.findValue("policy"), retNode.findValue("policy"));	
+		JsonNode retNode = (JsonNode) ret.getSecurityMetaData();
+		assertEquals(so_data.findValue("policy"), retNode.findValue("policy"));	
 	 }
 }
 

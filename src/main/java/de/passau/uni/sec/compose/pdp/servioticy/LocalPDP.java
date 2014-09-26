@@ -1,4 +1,7 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
@@ -32,9 +35,13 @@ public class LocalPDP implements PDP
 		
 		if(opId.equals(PDP.operationID.SendDataToServiceObject)) 
 		{
-			// Checks the token and returns the security meta-data
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
 			PermissionCacheObject ret = new PermissionCacheObject();
-			ret.setCache(id.verifyWebTokenApiToken(security_metadata_SO_current, token));
+
+			// Checks the token and returns the security meta-data
+			tempMapCache.put("SecurityMetaData", id.verifyWebTokenApiToken(security_metadata_SO_current, token));
+
+			ret.setCache(tempMapCache);
 			return ret;
 		}
 		else if (opId.equals(PDP.operationID.SendDataToServiceObjectProv)) // Initial provenance
