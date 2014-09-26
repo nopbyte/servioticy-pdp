@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.List;
 import java.util.LinkedList;
@@ -127,8 +129,9 @@ public class TestDefaultPolicy
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPublic(token);
 				JsonNode su_data = buildJsonSuMetadataPublic();
-				inputCache.setCache("{\"username\" : \"123Test\"}");	
-				// Get initial provenance
+				Map tempCacheMap = new HashMap<String, Object>();
+				tempCacheMap.put("UserId", "123");
+				inputCache.setCache(tempCacheMap);				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
@@ -156,8 +159,9 @@ public class TestDefaultPolicy
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPrivate(token, "123");
 				JsonNode su_data = buildJsonSuMetadataPrivate("123");
-				inputCache.setCache("{\"username\" : \"123\"}");	
-				// Get initial provenance
+				Map tempCacheMap = new HashMap<String, Object>();
+				tempCacheMap.put("UserId", "123");
+				inputCache.setCache(tempCacheMap);				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
@@ -184,7 +188,9 @@ public class TestDefaultPolicy
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPrivate(token, "123");
 				JsonNode su_data = buildJsonSuMetadataPrivate("123");
-				inputCache.setCache("{\"username\" : \"123False\"}");	
+				Map tempCacheMap = new HashMap<String, Object>();
+				tempCacheMap.put("UserId", "123False");
+				inputCache.setCache(tempCacheMap);	
 				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
