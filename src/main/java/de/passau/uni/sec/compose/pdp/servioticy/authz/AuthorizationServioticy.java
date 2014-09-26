@@ -53,7 +53,7 @@ public class AuthorizationServioticy
 		
 		 // Connect to IDM if no information is in the cach object
 		 String response = "";
-		 if (cache.getCache() == null) {		
+		 if (cache == null) {		
 		 	 // Check if user is allowed to get data from the SO
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
@@ -75,11 +75,12 @@ public class AuthorizationServioticy
 				user_data = null;
 			}
 			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
-			tempMapCache.put("UserId", userSO.toString());
+			if (userSO != null){
+				tempMapCache.put("UserId", userSO.asText());
+			}
+			cache = new PermissionCacheObject();
 			cache.setCache(tempMapCache);
-			
 		 }
-		 
 
 		// Check policies
 		boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
@@ -264,7 +265,7 @@ public class AuthorizationServioticy
 			JsonNode targetFlowSU = policySU;
 			if (targetSU.asText().contains("userid/"))
 			{
-				System.out.println("User SU: " + targetSU.asText() + " " + user);
+				//System.out.println("User SU: " + targetSU.asText() + " " + user);
 				if (targetSU.asText().equals("userid/"+ user))
 				{
 					ret = true;
