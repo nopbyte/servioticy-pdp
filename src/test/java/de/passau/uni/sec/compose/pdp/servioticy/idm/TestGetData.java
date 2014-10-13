@@ -1,4 +1,4 @@
-package de.passau.uni.sec.compose.pdp.servioticy;
+package de.passau.uni.sec.compose.pdp.servioticy.idm;
 
 import static org.junit.Assert.*;
 
@@ -22,6 +22,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.passau.uni.sec.compose.pdp.servioticy.LocalPDP;
+import de.passau.uni.sec.compose.pdp.servioticy.PDP;
+import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
 import de.passau.uni.sec.compose.pdp.servioticy.provenance.ServioticyProvenance;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IDMCommunicator;
@@ -30,10 +33,10 @@ import com.jayway.jsonpath.Criteria;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
-public class TestGetData 
+public class TestGetData
 {
-	 private PDP pdp; 
-	
+	 private PDP pdp;
+
 	 @Before
 	 public void setUp()
 	 {
@@ -44,7 +47,7 @@ public class TestGetData
 		 pdp.setIdmHost("132.231.11.217");
 	 }
 
-	 
+
 	 @Test
 	 public  void RetrieveServiceObjectDataCachePublicIDM() throws PDPServioticyException
 	 {
@@ -79,22 +82,22 @@ public class TestGetData
 				fail();
 			}
 	 }
-	 
 
 
 
-	 
+
+
 
 
 	 /**
-	  * 
+	  *
 	  * @param token
-	  * @return SO with public policy 
+	  * @return SO with public policy
 	  * @throws JsonProcessingException
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadataPrivate(String token, String userid) throws JsonProcessingException, IOException {
-		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"flow\" : { \"target\" : \"userid/" + userid + "\" }},{\"flow\" : { \"source\" : \"userid/" + userid + "\" }}]}}"; 
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"flow\" : { \"target\" : \"userid/" + userid + "\" }},{\"flow\" : { \"source\" : \"userid/" + userid + "\" }}]}}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
@@ -103,7 +106,7 @@ public class TestGetData
 
 
 	 /**
-	  * 
+	  *
 	  * @return Su
 	  * @throws JsonProcessingException
 	  * @throws IOException
@@ -118,9 +121,9 @@ public class TestGetData
 
 
 	 /**
-	  * 
+	  *
 	  * @param token
-	  * @return SO with public policy 
+	  * @return SO with public policy
 	  * @throws JsonProcessingException
 	  * @throws IOException
 	  */
@@ -134,7 +137,7 @@ public class TestGetData
 
 
 	 /**
-	  * 
+	  *
 	  * @return Su
 	  * @throws JsonProcessingException
 	  * @throws IOException
