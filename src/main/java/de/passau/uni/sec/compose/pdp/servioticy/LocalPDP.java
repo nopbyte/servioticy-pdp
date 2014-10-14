@@ -39,6 +39,8 @@ public class LocalPDP implements PDP
 			PermissionCacheObject ret = new PermissionCacheObject();
 
 			// Checks the token and returns the security meta-data
+			// the security metadata includes policy from the SO, and is inside the cache object.
+			// 
 			tempMapCache.put("SecurityMetaData", id.verifyWebTokenApiToken(security_metadata_SO_current, token));
 
 			ret.setCache(tempMapCache);
@@ -69,6 +71,16 @@ public class LocalPDP implements PDP
 		    // Check policy
 		    AuthorizationServioticy authz = new AuthorizationServioticy();
 		    return authz.verifyGetDataDispatch(security_metadata_SO_current, security_metadata_of_the_SU,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		}
+		else if(opId.equals(PDP.operationID.RetrieveServiceObjectDescription))
+		{
+			//get user access_token, and SO security metadata, cache object
+			//set permission boolean in the cache object to true or false depending on permissions
+			//return userId in the cache object (internal)
+		}
+		else if(opId.equals(PDP.operationID.GetUserInfo))
+		{
+			//Returns user information from access_Token
 		}
 		return null;
 	}

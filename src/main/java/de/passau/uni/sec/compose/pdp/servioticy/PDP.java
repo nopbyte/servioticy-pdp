@@ -8,14 +8,15 @@ public interface PDP
 {
 	public enum operationID {CreateServiceObject,
 		UpdateServiceObject,
-		RetrieveServiceObjectDescription,
+		RetrieveServiceObjectDescription,//allows or not retrieval of SO desciption with cache object as a param
 		RetrieveServiceObjectStreamsDescription,
 		RetrieveServiceObjectData, //checkPermission
 		SendDataToServiceObject, //checkAuthorizationWO
 		SendDataToServiceObjectProv, //initial provenance
 		CreateNewSubscription,
 		GetExistingSubscriptionsForStream, 
-		DispatchData//checkAuthorizationDispatch 
+		DispatchData,//checkAuthorizationDispatch
+		GetUserInfo//returns user id information from acccess_token
 	}
 
 	/**
