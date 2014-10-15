@@ -2,6 +2,7 @@ package de.passau.uni.sec.compose.pdp.servioticy.provenance;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.security.Timestamp;
 import java.util.Date;
@@ -10,8 +11,8 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
+import de.passau.uni.sec.compose.reputation.Source;
 
 public class ServioticyProvenance 
 {
@@ -60,5 +61,12 @@ public class ServioticyProvenance
 	{
 		throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
 	}
+    }
+    
+    public Source getSourceFromProvenanceData(String provenanceSensorUpdate)
+    {
+    	Source src = new Source();
+    	
+    	return src;
     }
 }
