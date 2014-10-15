@@ -36,30 +36,26 @@ public class LocalPDP implements PDP
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			operationID opId) throws PDPServioticyException {
 		
-		if(opId.equals(PDP.operationID.SendDataToServiceObject)) 
-		{
-			Map<String, Object> tempMapCache = new HashMap<String, Object>();
-			PermissionCacheObject ret = new PermissionCacheObject();
-
-			// Checks the token and returns the security meta-data
-			// the security metadata includes policy from the SO, and is inside the cache object.
-			// 
-			tempMapCache.put("SecurityMetaData", id.verifyWebTokenApiToken(security_metadata_SO_current, token));
-
-			ret.setCache(tempMapCache);
-			return ret;
-		}
-		else if (opId.equals(PDP.operationID.SendDataToServiceObjectProv)) // Initial provenance
+		if (opId.equals(PDP.operationID.SendDataToServiceObjectProv)) // Initial provenance + security metadata
 		{ 
-			//TODO Token not used
-			PermissionCacheObject ret = new PermissionCacheObject();
-			// Get initial Provenance
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			PermissionCacheObject ret = new PermissionCacheObject();			
+			
+			// Checks the token and returns the security meta-data
 			try{
-				ret.setCache(ServioticyProvenance.getInitialProvenance(security_metadata_SO_current));
+				id.verifyWebTokenApiToken(security_metadata_SO_current, token);
+			}
+			catch(Exception e) {
+				throw new PDPServioticyException(400, "Verification of web token error.", "Web token verification error");			    
+			}
+			// Adds initial provenance
+			try{
+				tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current));
 			} catch (Exception e) {
 				throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
 			    
 			}
+			ret.setCache(tempMapCache);
 			return ret;	
 		}
 		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
@@ -94,12 +90,10 @@ public class LocalPDP implements PDP
 			return authz.retrieveSOStreams(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.CreateNewSubscription))
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else {
+			throw new PDPServioticyException(501, "The operation is not implemented", "Wrong parameters");			
+		}
 		
-		
-		
-				
-		
-		return null;
 	}
 
 	public IdentityVerifier getId() {
