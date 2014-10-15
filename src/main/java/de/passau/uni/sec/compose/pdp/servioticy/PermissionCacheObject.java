@@ -1,6 +1,5 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,8 +22,13 @@ public class PermissionCacheObject
 	}
 	public String getUserId()
 	{
-		Map temp = (Map<String, Object>)this.cache;
-		String ret = (String) temp.get("UserId");
+		String ret = null;
+		if(cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("UserId"))
+				ret = (String) temp.get("UserId");
+		}
 		return ret;
 	}
 	public JsonNode getSecurityMetaData()

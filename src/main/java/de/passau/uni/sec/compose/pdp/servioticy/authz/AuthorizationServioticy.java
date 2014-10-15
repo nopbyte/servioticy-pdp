@@ -60,6 +60,11 @@ public class AuthorizationServioticy
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
+				 if(response ==null)
+				 {
+					 obj.setPermission(false);
+					 return obj;
+				 }
 			 }
 			 catch (PDPServioticyException e){
 				 obj.setPermission(false);
@@ -146,7 +151,7 @@ public class AuthorizationServioticy
 		//get user access_token, and SO security metadata, cache object
 		//set permission boolean in the cache object to true or false depending on permissions
 		//return userId in the cache object (internal)
-		return basicCheck(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+		return genericPublicPrivatePolicy(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 	
 	public PermissionCacheObject deleteSOData(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
@@ -156,7 +161,7 @@ public class AuthorizationServioticy
 	
 	public PermissionCacheObject retrieveSOStreams(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
-		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+		return genericPublicPrivatePolicy(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 	
 	public PermissionCacheObject updateSODescription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
@@ -169,13 +174,16 @@ public class AuthorizationServioticy
 		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 
-	public PermissionCacheObject createSubscription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	public PermissionCacheObject genericPublicPrivatePolicy(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
 	
 		IdentityVerifier idm = new IdentityVerifier();
+		Map<String, Object> tempMapCache = new HashMap<String, Object>();
 		String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
-		boolean allowed = evaluatePolicySubscribe(SO,userId);
+		tempMapCache.put("UserId", userId);
+		boolean allowed = evaluatePolicyGenericPublicPrivate(SO,userId);
 		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setCache(tempMapCache);
 		ret.setPermission(allowed);
 		return ret;
 		
@@ -189,45 +197,32 @@ public class AuthorizationServioticy
 		JsonNode owner = so.findValue("owner_id");
 		if(id.asText() != null && !id.asText().equals(""))
 		{
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			String uId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
+			tempMapCache.put("UserId", uId);
+			ret.setCache(tempMapCache);
 			//there is a usen authenticated behind the request
-			if(idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort).equals(owner.asText()))
+			if(uId.equals(owner.asText()))
 				ret.setPermission(true);
-			
-			ret.setPermission(false);
+			else
+				ret.setPermission(false);
 			return ret;
 		}
 		return null;
 	}
 
 	
-	private PermissionCacheObject basicCheck(JsonNode so, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
-	{
-		IdentityVerifier idm = new IdentityVerifier();
-		PermissionCacheObject ret = new PermissionCacheObject();
-		JsonNode id= so.findValue("id");
-		if(id.asText() != null && !id.asText().equals(""))
-		{
-			//there is a usen authenticated behind the request
-			if(idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort)!=null)
-			{	
-				ret.setPermission(true);
-				return ret;
-			}
-		}
-		return null;
-	}
-
-
 	/**
-	 * Checks if the user can subscribe to the service object
+	 * Checks if the private/public policy holds...
 	 * @param SO security_metadata_SO (destination SO)
 	 * @param userId security_metadata_of_the_SU (input SU)
 	 * @return returns true or false depending on the policy evaluation
 	 */
-	private boolean evaluatePolicySubscribe(JsonNode SO, String userId)
+	private boolean evaluatePolicyGenericPublicPrivate(JsonNode SO, String userId)
 	{
-		return evaluatePolicySubscribe(SO, userId);
+		return evaluatePolicy(SO, userId);
 	}
+	
 	/**
 	 * Checks the policy during dispatching 
 	 *

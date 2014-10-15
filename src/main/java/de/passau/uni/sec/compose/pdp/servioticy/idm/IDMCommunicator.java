@@ -158,6 +158,8 @@ public class IDMCommunicator {
 		headers.put("Content-Type","application/json;charset=UTF-8");
 		CloseableHttpResponse res = internalGetToIDM("/idm/user/info/", headers);
 		try {
+			 if(res.getStatusLine().getStatusCode()!=200)
+				 return null;
 			String ret =  EntityUtils.toString(res.getEntity());
 			
 			return ret;

@@ -38,23 +38,28 @@ public class IdentityVerifier
     {
     	String response = "";
     	IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
-		 try {
+   	    JsonNode user_data = null;
+		try {
 			 response = com.getInformationForUser(accessToken);
+			 ObjectMapper mapperUser = new ObjectMapper();
+			 if(response == null)
+				 return null;
+			 user_data = mapperUser.readTree(response);
+					
 		 }
 		 catch (PDPServioticyException e){
-			 return "";
+			 return null;
 		 }
-		// Parse response
-	    ObjectMapper mapperUser = new ObjectMapper();
-	    JsonNode user_data = null;
-		try {
-			user_data = mapperUser.readTree(response);
-		} catch (JsonProcessingException e1) {
+		 catch (JsonProcessingException e1) {
 			user_data = null;
 		} catch (IOException e1) {
 			user_data = null;
 		}
-		JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
-		return userSO.asText();
+		if(user_data!=null)
+		{
+		  JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
+		  return userSO.asText();
+		}
+		return null;
     }
 }

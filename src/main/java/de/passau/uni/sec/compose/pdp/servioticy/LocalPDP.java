@@ -76,12 +76,16 @@ public class LocalPDP implements PDP
 		}
 		else if(opId.equals(PDP.operationID.GetUserInfo))
 		{
+			//returns the user inside cache
 			PermissionCacheObject ret = new PermissionCacheObject();
-			ret.setCache(id.userIdFromToken(token,this.idmHost, this.idmUser,this.idmPassword, idmPort));
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			String uid = id.userIdFromToken(token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+			tempMapCache.put("UserId", uid);
+			ret.setCache(tempMapCache);
 			return ret;
 		}
 		else if(opId.equals(PDP.operationID.RetrieveServiceObjectDescription))
-			authz.retrieveSODescription(security_metadata_of_the_SU, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+			return authz.retrieveSODescription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.UpdateServiceObject))
 			return authz.updateSODescription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.DeleteServiceObjectDescription))
@@ -89,7 +93,7 @@ public class LocalPDP implements PDP
 		else if (opId.equals(PDP.operationID.retrieveSOStreams))
 			return authz.retrieveSOStreams(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.CreateNewSubscription))
-			return authz.createSubscription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		
 		
 		
