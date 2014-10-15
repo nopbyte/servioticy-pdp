@@ -6,8 +6,8 @@ import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException
 
 public interface PDP 
 {
-	public enum operationID {CreateServiceObject,
-		UpdateServiceObject,
+	public enum operationID {//CreateServiceObject,//create a new SO
+		UpdateServiceObject,//update a service object definition
 		RetrieveServiceObjectDescription,//allows or not retrieval of SO desciption with cache object as a param
 		RetrieveServiceObjectStreamsDescription,
 		RetrieveServiceObjectData, //checkPermission
@@ -16,7 +16,9 @@ public interface PDP
 		CreateNewSubscription,
 		GetExistingSubscriptionsForStream, 
 		DispatchData,//checkAuthorizationDispatch
-		GetUserInfo//returns user id information from acccess_token
+		GetUserInfo,//returns user id information from acccess_token
+		DeleteServiceObjectDescription,//delete a service object
+		retrieveSOStreams
 	}
 
 	/**

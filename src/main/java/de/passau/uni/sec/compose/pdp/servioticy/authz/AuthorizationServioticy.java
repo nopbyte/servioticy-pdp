@@ -20,12 +20,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IDMCommunicator;
+import de.passau.uni.sec.compose.pdp.servioticy.idm.IdentityVerifier;
 
 public class AuthorizationServioticy 
 {
 	private static final String IDM_USER_SECTION = "id";
 
-
+	
+	
 	/**
 	 * Verifies the policy for the currnt SO and a SU
 	 *
@@ -139,12 +141,93 @@ public class AuthorizationServioticy
 				
 	}
 
+	public PermissionCacheObject retrieveSODescription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		//get user access_token, and SO security metadata, cache object
+		//set permission boolean in the cache object to true or false depending on permissions
+		//return userId in the cache object (internal)
+		return basicCheck(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+	}
+	
+	public PermissionCacheObject deleteSOData(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+	}
+	
+	public PermissionCacheObject retrieveSOStreams(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+	}
+	
+	public PermissionCacheObject updateSODescription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+	}
+	
+	public PermissionCacheObject deleteSODescription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
+	}
+
+	public PermissionCacheObject createSubscription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+	
+		IdentityVerifier idm = new IdentityVerifier();
+		String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
+		boolean allowed = evaluatePolicySubscribe(SO,userId);
+		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setPermission(allowed);
+		return ret;
+		
+	}
+
+	private PermissionCacheObject checkOwner(JsonNode so, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		IdentityVerifier idm = new IdentityVerifier();
+		PermissionCacheObject ret = new PermissionCacheObject();
+		JsonNode id= so.findValue("id");
+		JsonNode owner = so.findValue("owner_id");
+		if(id.asText() != null && !id.asText().equals(""))
+		{
+			//there is a usen authenticated behind the request
+			if(idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort).equals(owner.asText()))
+				ret.setPermission(true);
+			
+			ret.setPermission(false);
+			return ret;
+		}
+		return null;
+	}
+
+	
+	private PermissionCacheObject basicCheck(JsonNode so, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		IdentityVerifier idm = new IdentityVerifier();
+		PermissionCacheObject ret = new PermissionCacheObject();
+		JsonNode id= so.findValue("id");
+		if(id.asText() != null && !id.asText().equals(""))
+		{
+			//there is a usen authenticated behind the request
+			if(idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort)!=null)
+			{	
+				ret.setPermission(true);
+				return ret;
+			}
+		}
+		return null;
+	}
 
 
-
-
-
-
+	/**
+	 * Checks if the user can subscribe to the service object
+	 * @param SO security_metadata_SO (destination SO)
+	 * @param userId security_metadata_of_the_SU (input SU)
+	 * @return returns true or false depending on the policy evaluation
+	 */
+	private boolean evaluatePolicySubscribe(JsonNode SO, String userId)
+	{
+		return evaluatePolicySubscribe(SO, userId);
+	}
 	/**
 	 * Checks the policy during dispatching 
 	 *

@@ -22,9 +22,12 @@ public class LocalPDP implements PDP
 	
 	private String idmPassword;
 	
+	private AuthorizationServioticy authz;
+	
 	public LocalPDP()
 	{
 		id = new IdentityVerifier();
+		 authz = new AuthorizationServioticy();
 	}
 	
 	@Override
@@ -63,25 +66,35 @@ public class LocalPDP implements PDP
 		{
 		    //TODO SO not used
 		    // Check policy (check parameters SU and authentikation token?) do the stuff with the cach object
-		    AuthorizationServioticy authz = new AuthorizationServioticy();
+		    
 		    return authz.verifyGetData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		}
 		else if (opId.equals(PDP.operationID.DispatchData)) 
 		{
 		    // Check policy
-		    AuthorizationServioticy authz = new AuthorizationServioticy();
 		    return authz.verifyGetDataDispatch(security_metadata_SO_current, security_metadata_of_the_SU,this.idmHost, this.idmUser,this.idmPassword, idmPort);
-		}
-		else if(opId.equals(PDP.operationID.RetrieveServiceObjectDescription))
-		{
-			//get user access_token, and SO security metadata, cache object
-			//set permission boolean in the cache object to true or false depending on permissions
-			//return userId in the cache object (internal)
 		}
 		else if(opId.equals(PDP.operationID.GetUserInfo))
 		{
-			//Returns user information from access_Token
+			PermissionCacheObject ret = new PermissionCacheObject();
+			ret.setCache(id.userIdFromToken(token,this.idmHost, this.idmUser,this.idmPassword, idmPort));
+			return ret;
 		}
+		else if(opId.equals(PDP.operationID.RetrieveServiceObjectDescription))
+			authz.retrieveSODescription(security_metadata_of_the_SU, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.UpdateServiceObject))
+			return authz.updateSODescription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.DeleteServiceObjectDescription))
+			return authz.deleteSODescription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if (opId.equals(PDP.operationID.retrieveSOStreams))
+			return authz.retrieveSOStreams(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.CreateNewSubscription))
+			return authz.createSubscription(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		
+		
+		
+				
+		
 		return null;
 	}
 
