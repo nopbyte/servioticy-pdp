@@ -23,7 +23,7 @@ public class PermissionCacheObject
 	public String getUserId()
 	{
 		String ret = null;
-		if(cache instanceof Map)
+		if(this.cache != null && this.cache instanceof Map)
 		{
 			Map temp = (Map<String, Object>)this.cache;
 			if(temp.containsKey("UserId"))
@@ -33,8 +33,13 @@ public class PermissionCacheObject
 	}
 	public JsonNode getSecurityMetaData()
 	{
-		Map temp = (Map<String, Object>)this.cache;
-		JsonNode ret = (JsonNode) temp.get("SecurityMetaData");
+		JsonNode ret = null;
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("SecurityMetaData"))
+			ret = (JsonNode) temp.get("SecurityMetaData");
+		}
 		return ret;
 	}
 }

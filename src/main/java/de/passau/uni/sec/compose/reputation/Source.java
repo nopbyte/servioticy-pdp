@@ -2,9 +2,9 @@ package de.passau.uni.sec.compose.reputation;
 
 public class Source 
 {
-	private String soid;
+	private String soid="";
 	
-	private String streamid;
+	private String streamid="";
 
 	public String getSoid() {
 		return soid;
