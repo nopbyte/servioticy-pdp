@@ -44,17 +44,12 @@ public class TestInitialProv
 				ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check initial provenance (if it is a valide JSON doc and if it has the right provenance onbehalf entry)
-				String onbehalfString = "";
-				List<Object>  tempList = new LinkedList<Object>();
-				tempList = JsonPath.read(ret.getCache().toString(), ".provenance.onbehalf");
-				for (Object tempObject : tempList)
-				{
-					if (tempObject != null)
-					{
-						onbehalfString += tempObject.toString();
-					}
-				}	
-				assertEquals("owner_identifier123123", onbehalfString);
+				JsonNode retNode = ret.getSecurityMetaData();
+				String policy = retNode.findValue("policy").toString();
+				String onbehalf = retNode.findValue("onbehalf").asText();
+				assertEquals("[{\"flow\":{\"forall\":\"entities\",\"target\":\"entities\"}},{\"flow\":{\"forall\":\"entities\",\"source\":\"entities\"}}]", policy);
+				assertEquals("owner_identifier123123", onbehalf);
+
 
 
 
@@ -77,7 +72,7 @@ public class TestInitialProv
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadata(String token) throws JsonProcessingException, IOException {
-		     String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\"}";
+		     String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" :[{\"flow\" : { \"forall\" : \"entities\", \"target\" : \"entities\" }},{\"flow\" : { \"forall\" : \"entities\", \"source\" : \"entities\" }}]}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
