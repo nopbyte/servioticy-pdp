@@ -48,9 +48,9 @@ public class TestGetData
 	 {
 		
 			try {
-				System.out.println(generateSecurityMetadata(soid, streamid));
 				ServioticyProvenance prov = new ServioticyProvenance();
 				Source src = prov.getSourceFromSecurityMetaData(generateSecurityMetadata(soid, streamid));
+				System.out.println(prov.getSourceFromSecurityMetaDataAsString(generateSecurityMetadata(soid, streamid)));
 				assertEquals(src.getSoid(), soid);
 				assertEquals(src.getStreamid(), streamid);
 				

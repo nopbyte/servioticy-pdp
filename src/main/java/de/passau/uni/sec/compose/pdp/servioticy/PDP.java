@@ -10,15 +10,26 @@ public interface PDP
 		UpdateServiceObject,//update a service object definition
 		RetrieveServiceObjectDescription,//allows or not retrieval of SO desciption with cache object as a param
 		RetrieveServiceObjectStreamsDescription,
-		RetrieveServiceObjectData, //checkPermission
-		SendDataToServiceObject, //checkAuthorizationWO
+		RetrieveServiceObjectData, //checkPermission when users are querying the API for data (each SU at the time)
 		SendDataToServiceObjectProv, //initial provenance
-		CreateNewSubscription,
-		GetExistingSubscriptionsForStream, 
 		DispatchData,//checkAuthorizationDispatch
 		GetUserInfo,//returns user id information from acccess_token
 		DeleteServiceObjectDescription,//delete a service object
-		retrieveSOStreams
+		DeleteSensorUpdateData,// When deleting a data item from 
+		retrieveSOStreams,
+		GetExistingSubscriptionsForStream, 
+		SearchUpdates, //public or private policy for now
+		CreateNewSubscription,//public or private
+		GetSubscriptions,//public or private
+		GetSpecificSubscription,//public or private
+		DeleteSpecificSubscription,//public or private
+		GetActuations,
+		GetActuationStatus,
+		LaunchActuation,
+		UpdateActuation
+		
+		
+		
 	}
 
 	/**

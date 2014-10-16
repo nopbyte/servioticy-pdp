@@ -70,6 +70,12 @@ public class LocalPDP implements PDP
 		    // Check policy
 		    return authz.verifyGetDataDispatch(security_metadata_SO_current, security_metadata_of_the_SU,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		}
+		else if (opId.equals(PDP.operationID.DeleteSensorUpdateData)) 
+		{
+		    // Check policy
+		    return authz.verifyDeleteData(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		}
+		
 		else if(opId.equals(PDP.operationID.GetUserInfo))
 		{
 			//returns the user inside cache
@@ -89,6 +95,24 @@ public class LocalPDP implements PDP
 		else if (opId.equals(PDP.operationID.retrieveSOStreams))
 			return authz.retrieveSOStreams(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.CreateNewSubscription))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.SearchUpdates))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.CreateNewSubscription))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.GetSubscriptions))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.GetSpecificSubscription))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.DeleteSpecificSubscription))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.GetActuations))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.GetActuationStatus))
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.LaunchActuation)) // this one is only getting so because we do policies on the SO only, not in streams or actuators
+			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.UpdateActuation)) 
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else {
 			throw new PDPServioticyException(501, "The operation is not implemented", "Wrong parameters");			

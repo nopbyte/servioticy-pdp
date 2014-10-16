@@ -146,6 +146,70 @@ public class AuthorizationServioticy
 				
 	}
 
+	
+	public PermissionCacheObject verifyDeleteData( String access_token_user ,
+			JsonNode security_metadata_SO_current,
+			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
+			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
+		
+		Map<String, Object> tempMapCache = new HashMap<String, Object>();
+
+		// Check if parameters to connect to IDM exist
+	 	 if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0) {
+	 		throw new PDPServioticyException(500, "Not enough parameters to talk to the IDM ", "Not enough parameters to talk to IDM");
+		 }
+		 if(security_metadata_of_the_SU ==null || security_metadata_SO_current ==null)
+				throw new PDPServioticyException(500, "No security metadata for the sensor update or service object", "Not enough security metadata for the sensor update or service object");
+		 // Connect to IDM if no information is in the cach object
+		 String response = "";
+		 if (cache == null) {		
+		 	 // Check if user is allowed to get data from the SO
+			 cache = new PermissionCacheObject();
+			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
+			 try {
+				 response = com.getInformationForUser(access_token_user);
+				 if(response ==null)
+				 {
+					 cache.setPermission(false);
+					 return cache;
+				 }
+			 }
+			 catch (PDPServioticyException e){
+				 cache.setPermission(false);
+				 cache.setCache(e);
+				 return cache;
+			 }
+			// Parse response
+		    ObjectMapper mapperUser = new ObjectMapper();
+		    JsonNode user_data = null;
+			try {
+				user_data = mapperUser.readTree(response);
+			} catch (JsonProcessingException e1) {
+				user_data = null;
+			} catch (IOException e1) {
+				user_data = null;
+			}
+			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
+			if (userSO != null){
+				tempMapCache.put("UserId", userSO.asText());
+			}
+			cache = new PermissionCacheObject();
+			cache.setCache(tempMapCache);
+		 }
+
+		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
+		 if(owner==null)
+			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
+		 String soOwner = owner.asText();
+		// Check policies
+		 if(cache.getUserId().equals(soOwner))
+		 {
+			 cache.setPermission(true);
+		 }
+		
+		return cache;				
+	}
+	
 	public PermissionCacheObject retrieveSODescription(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
 		//get user access_token, and SO security metadata, cache object
@@ -154,10 +218,6 @@ public class AuthorizationServioticy
 		return genericPublicPrivatePolicy(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 	
-	public PermissionCacheObject deleteSOData(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
-	{
-		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
-	}
 	
 	public PermissionCacheObject retrieveSOStreams(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
@@ -174,6 +234,7 @@ public class AuthorizationServioticy
 		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 
+	
 	public PermissionCacheObject genericPublicPrivatePolicy(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
 	

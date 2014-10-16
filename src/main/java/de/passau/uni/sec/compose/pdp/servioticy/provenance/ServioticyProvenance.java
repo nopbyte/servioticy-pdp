@@ -96,4 +96,10 @@ public class ServioticyProvenance
 				
     	return src;
     }
+    
+    public String getSourceFromSecurityMetaDataAsString(String SU_securityMetadata) throws PDPServioticyException
+    {
+    	Source src = getSourceFromSecurityMetaData(SU_securityMetadata);
+    	return "{\"soid\":\""+src.getSoid()+"\",\"streamid\":\""+src.getStreamid()+"\"}";
+    }
 }
