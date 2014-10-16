@@ -1,19 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-//for inclusion in servioticy
-apply plugin: 'maven'
-configure(install.repositories.mavenInstaller) {
-    pom.project {
-        groupId 'de.passau.uni'
-        artifactId 'servioticy-pdp'
-        packaging 'jar'
-        version  jar['version']
-    }
-}
-
-
-
 // tag::repositories[]
 repositories { 
     mavenCentral() 
@@ -55,3 +42,13 @@ task wrapper(type: Wrapper) {
 }
 // end::wrapper[]
 
+//for inclusion in servioticy
+apply plugin: 'maven'
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+        groupId 'de.passau.uni'
+        artifactId 'servioticy-pdp'
+        packaging 'jar'
+        version  jar['version']
+    }
+}
