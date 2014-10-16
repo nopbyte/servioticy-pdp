@@ -85,8 +85,22 @@ public class TestGetData
 	 
 	 private String generateSecurityMetadata(String soid, String streamid)
 	 {
-		return  "{\"id\":\"13412341234123412341324\",\"owner_id\":\"owner_identifier123123\", \"policy\" :[{\"flow\" : { \"forall\" : \"entities\", \"target\" : \"entities\" }},{\"flow\" : { \"forall\" : \"entities\", \"source\" : \"entities\" }}],\"provenance\":{\"entity\":\""+soid+"\",\"stream\":\""+streamid+"\"}}";
+		String template = "{    \"policy\": [        [            {                \"flow\": {                    \"target\": \"user/testb\"                }            }        ],        [            {                \"flow\": {                    \"target\": \"user/testa\"                }            }        ]    ],    \"payment\": false,   "
+				+ " \"provenance\": {        \"agent\": \"SO\",    "
+				+ "    \"type\": \"sensor_update\",        "
+				+ "\"entity\": \""+soid+"\",       "
+				+ " \"activity\": [    {                \"op\": [],                \"var\": [                    \"a\",                    \"b\"                ]            }        ],      "
+				+ " \"timestamp\": 1413445754839,      "
+				+ " \"accessed\": [],      "
+				+ "  \"onbehalf-of\": \"userid\",    "
+				+ "    \"so-stream\": \""+streamid+"\","
+				+ "        \"source\": [            { "
+				+ "               \"entity\": \"SU-B-ID\",               "
+								+ " \"source\": [ \"xx-b\" ]            },   "
+								+ "{ \"entity\": \"Not_latest_source\",               \"source\": [                    \"xx-a\"                ]            }        ]    }}";
+		return template;
 	 }
+
 
 
 	 

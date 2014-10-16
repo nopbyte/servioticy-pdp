@@ -80,7 +80,7 @@ public class ServioticyProvenance
 			if(provenance != null)
 			{
 			  JsonNode soId = provenance.get("entity");
-			  JsonNode stream = provenance.get("stream");
+			  JsonNode stream = provenance.get("so-stream");
 			  if(soId!=null && stream!=null)
 			  {
 				 src.setSoid(soId.asText());
