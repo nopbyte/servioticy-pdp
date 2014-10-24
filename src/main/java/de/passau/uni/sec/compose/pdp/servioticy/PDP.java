@@ -11,7 +11,7 @@ public interface PDP
 		RetrieveServiceObjectDescription,//allows or not retrieval of SO desciption with cache object as a param
 		RetrieveServiceObjectStreamsDescription,
 		RetrieveServiceObjectData, //checkPermission when users are querying the API for data (each SU at the time)
-		SendDataToServiceObjectProv, //initial provenance
+		//SendDataToServiceObjectProv, //initial provenance
 		DispatchData,//checkAuthorizationDispatch
 		GetUserInfo,//returns user id information from acccess_token
 		DeleteServiceObjectDescription,//delete a service object
@@ -47,6 +47,10 @@ public interface PDP
 			PermissionCacheObject cache,
 			 operationID opId) throws PDPServioticyException;
 
+	public PermissionCacheObject SendDataToServiceObjectProv(String token,
+			JsonNode security_metadata_SO_current,
+			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
+			operationID opId, String stream) throws PDPServioticyException; 
 	public String getIdmHost();
 	public void setIdmHost(String idmHost);
 	public String getIdmUser();

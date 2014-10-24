@@ -9,18 +9,27 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.security.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
+import de.passau.uni.sec.compose.pdp.servioticy.PDP.operationID;
+import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
+import de.passau.uni.sec.compose.pdp.servioticy.idm.IdentityVerifier;
 import de.passau.uni.sec.compose.reputation.Source;
 
 public class ServioticyProvenance 
 {
 
-    public static JsonNode getInitialProvenance(JsonNode serviceObjectMetadata) throws PDPServioticyException
+
+	
+	
+    public static JsonNode getInitialProvenance(JsonNode serviceObjectMetadata, String stream) throws PDPServioticyException
     {
 	//JsonNode ret = rootNode.path("provenance");
 		if (serviceObjectMetadata != null)
@@ -44,7 +53,7 @@ public class ServioticyProvenance
 			String stringMetaData = "{";
 			// Add security metadata for the SU
 			// build inital provenance data
-			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : \"creation\", \"timestamp\":" + timestamp + ",\"accessed\":\"\", \"onbehalf\":\"" + owner_id.asText() + "\", \"source\":\"" + source + "\"}";
+			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : \"creation\", \"timestamp\":" + timestamp + ",\"so-stream\"" + stream  + ",\"accessed\":\"\", \"onbehalf\":\"" + owner_id.asText() + "\", \"source\":\"" + source + "\"}";
 			stringMetaData += ",\"policy\":" + policy;
 			stringMetaData += "}";
 			ObjectMapper mapper = new ObjectMapper();
@@ -103,4 +112,14 @@ public class ServioticyProvenance
 			throw new PDPServioticyException(500, "Wrong format in security metadata. ", "Wrong parameters. IOException while reading string: "+SU_securityMetadata);
 		}
     }
+    
 }
+
+
+
+
+
+
+
+
+
