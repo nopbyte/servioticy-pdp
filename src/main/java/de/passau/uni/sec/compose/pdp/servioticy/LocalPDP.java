@@ -36,34 +36,7 @@ public class LocalPDP implements PDP
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			operationID opId) throws PDPServioticyException {
 		
-		if (opId.equals(PDP.operationID.SendDataToServiceObjectProv)) // Initial provenance + security metadata
-		{ 
-			Map<String, Object> tempMapCache = new HashMap<String, Object>();
-			PermissionCacheObject ret = new PermissionCacheObject();			
-			
-			// Checks the token and returns the security meta-data
-			try{
-				id.verifyWebTokenApiToken(security_metadata_SO_current, token);
-			}
-			catch(PDPServioticyException ex)
-			{
-				//if it was a PDPServioticyException let it flow up!
-				throw ex;
-			}
-			catch(Exception e) {
-				throw new PDPServioticyException(400, "Verification of web token error.", "Web token verification error");			    
-			}
-			// Adds initial provenance
-			try{
-				tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current));
-			} catch (Exception e) {
-				throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
-			    
-			}
-			ret.setCache(tempMapCache);
-			return ret;	
-		}
-		else if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
+		if(opId.equals(PDP.operationID.RetrieveServiceObjectData))
 		{
 		    //TODO SO not used
 		    // Check policy (check parameters SU and authentikation token?) do the stuff with the cach object
@@ -166,6 +139,37 @@ public class LocalPDP implements PDP
 	}
 	
 	
+	public PermissionCacheObject SendDataToServiceObjectProv(String token,
+			JsonNode security_metadata_SO_current,
+			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
+			String stream) throws PDPServioticyException 
+			{ 
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			PermissionCacheObject ret = new PermissionCacheObject();			
+			
+			// Checks the token and returns the security meta-data
+			try{
+				id.verifyWebTokenApiToken(security_metadata_SO_current, token);
+			}
+			catch(PDPServioticyException ex)
+			{
+				//if it was a PDPServioticyException let it flow up!
+				throw ex;
+			}
+			catch(Exception e) {
+				throw new PDPServioticyException(400, "Verification of web token error.", "Web token verification error");			    
+			}
+			// Adds initial provenance
+			try{
+				tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
+			} catch (Exception e) {
+				throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
+			    
+			}
+			ret.setCache(tempMapCache);
+			return ret;	
+
+	}
 	
 	
 }
