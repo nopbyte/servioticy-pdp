@@ -45,31 +45,42 @@ public class AuthorizationServioticy
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
 		
-		Map<String, Object> tempMapCache = new HashMap<String, Object>();
+		Map<String, Object> internalCache = new HashMap<String, Object>();
 
 		// Check if parameters to connect to IDM exist
-	 	 PermissionCacheObject obj = new PermissionCacheObject();
 	 	 if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0) {
 	 		throw new PDPServioticyException(500, "Not enough parameters to talk to the IDM ", "Not enough parameters to talk to IDM");
 		 }
-		
-		 // Connect to IDM if no information is in the cach object
+		 if(security_metadata_of_the_SU ==null || security_metadata_SO_current ==null)
+				throw new PDPServioticyException(500, "No security metadata for the sensor update or service object", "Not enough security metadata for the sensor update or service object");
+		 // Connect to IDM if no information is in the cach objecttempMapCache
 		 String response = "";
-		 if (cache ==null || cache.getCache() == null) {		
+		 if (cache ==null || cache.getCache() == null) {	
+			 if(cache==null)
+				 cache = new PermissionCacheObject();
 		 	 // Check if user is allowed to get data from the SO
+			 if(cache.getCache()!=null)
+				 internalCache = (Map<String, Object>) cache.getCache();
+			 if(((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
+			 {
+				 cache.setPermission(false);
+				 return cache;
+			 }
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
 				 if(response ==null)
 				 {
-					 obj.setPermission(false);
-					 return obj;
+					 internalCache.put("wrong:"+access_token_user, new Boolean(true));
+					 cache.setPermission(false);
+					 return cache;
 				 }
+				 internalCache.put("wrong:"+access_token_user, new Boolean(false));
 			 }
 			 catch (PDPServioticyException e){
-				 obj.setPermission(false);
-				 obj.setCache(e);
-				 return obj;
+				 cache.setPermission(false);
+				 cache.setCache(e);
+				 return cache;
 			 }
 			// Parse response
 		    ObjectMapper mapperUser = new ObjectMapper();
@@ -83,19 +94,18 @@ public class AuthorizationServioticy
 			}
 			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
 			if (userSO != null){
-				tempMapCache.put("UserId", userSO.asText());
+				internalCache.put("UserId", userSO.asText());
 			}
-			cache = new PermissionCacheObject();
-			cache.setCache(tempMapCache);
+			cache.setCache(internalCache);
 		 }
 
-		// Check policies
-		boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
-		// Set cache
-		 //tempMap.put("UserMetaData", response);
-		obj.setPermission(poleval);
-		obj.setCache(cache.getCache());
-		return obj;				
+		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
+		 if(owner==null)
+			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
+		 String soOwner = owner.asText();
+		 boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
+		 cache.setPermission(poleval);
+		return cache;		
 	}
 
 	/**
@@ -152,7 +162,7 @@ public class AuthorizationServioticy
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
 		
-		Map<String, Object> tempMapCache = new HashMap<String, Object>();
+		Map<String, Object> internalCache = new HashMap<String, Object>();
 
 		// Check if parameters to connect to IDM exist
 	 	 if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0) {
@@ -160,19 +170,29 @@ public class AuthorizationServioticy
 		 }
 		 if(security_metadata_of_the_SU ==null || security_metadata_SO_current ==null)
 				throw new PDPServioticyException(500, "No security metadata for the sensor update or service object", "Not enough security metadata for the sensor update or service object");
-		 // Connect to IDM if no information is in the cach object
+		 // Connect to IDM if no information is in the cach objecttempMapCache
 		 String response = "";
-		 if (cache ==null || cache.getCache() == null) {		
+		 if (cache ==null || cache.getCache() == null) {	
+			 if(cache==null)
+				 cache = new PermissionCacheObject();
 		 	 // Check if user is allowed to get data from the SO
-			 cache = new PermissionCacheObject();
+			 if(cache.getCache()!=null)
+				 internalCache = (Map<String, Object>) cache.getCache();
+			 if(((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
+			 {
+				 cache.setPermission(false);
+				 return cache;
+			 }
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
 				 if(response ==null)
 				 {
+					 internalCache.put("wrong:"+access_token_user, new Boolean(true));
 					 cache.setPermission(false);
 					 return cache;
 				 }
+				 internalCache.put("wrong:"+access_token_user, new Boolean(false));
 			 }
 			 catch (PDPServioticyException e){
 				 cache.setPermission(false);
@@ -191,10 +211,9 @@ public class AuthorizationServioticy
 			}
 			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
 			if (userSO != null){
-				tempMapCache.put("UserId", userSO.asText());
+				internalCache.put("UserId", userSO.asText());
 			}
-			cache = new PermissionCacheObject();
-			cache.setCache(tempMapCache);
+			cache.setCache(internalCache);
 		 }
 
 		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
