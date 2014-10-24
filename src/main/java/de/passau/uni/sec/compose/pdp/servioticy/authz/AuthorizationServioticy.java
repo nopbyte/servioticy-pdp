@@ -55,7 +55,7 @@ public class AuthorizationServioticy
 		
 		 // Connect to IDM if no information is in the cach object
 		 String response = "";
-		 if (cache.getCache() == null) {		
+		 if (cache ==null || cache.getCache() == null) {		
 		 	 // Check if user is allowed to get data from the SO
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
@@ -162,7 +162,7 @@ public class AuthorizationServioticy
 				throw new PDPServioticyException(500, "No security metadata for the sensor update or service object", "Not enough security metadata for the sensor update or service object");
 		 // Connect to IDM if no information is in the cach object
 		 String response = "";
-		 if (cache.getCache() == null) {		
+		 if (cache ==null || cache.getCache() == null) {		
 		 	 // Check if user is allowed to get data from the SO
 			 cache = new PermissionCacheObject();
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
