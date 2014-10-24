@@ -45,6 +45,11 @@ public class LocalPDP implements PDP
 			try{
 				id.verifyWebTokenApiToken(security_metadata_SO_current, token);
 			}
+			catch(PDPServioticyException ex)
+			{
+				//if it was a PDPServioticyException let it flow up!
+				throw ex;
+			}
 			catch(Exception e) {
 				throw new PDPServioticyException(400, "Verification of web token error.", "Web token verification error");			    
 			}

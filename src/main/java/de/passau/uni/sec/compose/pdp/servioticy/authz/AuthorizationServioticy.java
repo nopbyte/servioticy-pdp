@@ -237,15 +237,17 @@ public class AuthorizationServioticy
 	
 	public PermissionCacheObject genericPublicPrivatePolicy(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
-	
+		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setPermission(false);
 		IdentityVerifier idm = new IdentityVerifier();
 		Map<String, Object> tempMapCache = new HashMap<String, Object>();
 		String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
 		tempMapCache.put("UserId", userId);
-		boolean allowed = evaluatePolicyGenericPublicPrivate(SO,userId);
-		PermissionCacheObject ret = new PermissionCacheObject();
+		if(userId!=null)
+		{
+		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SO,userId));
+		}
 		ret.setCache(tempMapCache);
-		ret.setPermission(allowed);
 		return ret;
 		
 	}
