@@ -1,8 +1,10 @@
 package de.passau.uni.sec.compose.pdp.servioticy.provenance;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.security.Timestamp;
@@ -61,45 +63,41 @@ public class ServioticyProvenance
 			throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
 		}
     }
-    /**
-     * This method regturns the source including soid and stream that provided the sensor update containing the SU_securityMetadata
-     * @param SU_securityMetadata
-     * @return
-     * @throws PDPServioticyException
-     */
-    public Source getSourceFromSecurityMetaData(String SU_securityMetadata) throws PDPServioticyException
+    public JsonNode getSourceFromSecurityMetaDataJsonNode(String SU_securityMetadata) throws PDPServioticyException
     {
-    	Source src = new Source();
     	ObjectMapper mapper = new ObjectMapper();
+    	JsonNode root = mapper.createObjectNode();
+    	
 		try {
 			//TODO fix once provenance is mandatory
 			if(SU_securityMetadata==null||SU_securityMetadata.equals(""))
-				return src;
+			{
+				((ObjectNode)root).put("soid","");
+				((ObjectNode)root).put("streamid", "");
+				return root;
+			}
 			JsonNode security = mapper.readTree(SU_securityMetadata);
 			JsonNode provenance = security.findValue("provenance");
 			if(provenance != null)
 			{
+				
 			  JsonNode soId = provenance.get("entity");
 			  JsonNode stream = provenance.get("so-stream");
-			  if(soId!=null && stream!=null)
-			  {
-				 src.setSoid(soId.asText());
-			     src.setStreamid(stream.asText());
-			  }
+			  ((ObjectNode)root).put("soid",soId);
+			  ((ObjectNode)root).put("streamid", stream);
 			}
+			return root;
 			
 		} catch (JsonProcessingException e) {
 			 throw new PDPServioticyException(500, "Wrong format in security metadata. ", "Wrong parameters. JsonProcessingException for string: "+SU_securityMetadata);
 		} catch (IOException e) {
 			throw new PDPServioticyException(500, "Wrong format in security metadata. ", "Wrong parameters. IOException while reading string: "+SU_securityMetadata);
 		}
-				
-    	return src;
     }
+ 
     
     public String getSourceFromSecurityMetaDataAsString(String SU_securityMetadata) throws PDPServioticyException
     {
-    	Source src = getSourceFromSecurityMetaData(SU_securityMetadata);
-    	return "{\"soid\":\""+src.getSoid()+"\",\"streamid\":\""+src.getStreamid()+"\"}";
+    	return getSourceFromSecurityMetaDataJsonNode(SU_securityMetadata).toString();	
     }
 }
