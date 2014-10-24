@@ -50,7 +50,7 @@ public interface PDP
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
-			operationID opId, String stream) throws PDPServioticyException; 
+			String stream) throws PDPServioticyException; 
 	public String getIdmHost();
 	public void setIdmHost(String idmHost);
 	public String getIdmUser();

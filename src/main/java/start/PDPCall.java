@@ -38,7 +38,7 @@ public class PDPCall {
 	    String token=UUID.randomUUID().toString();
 	    
 		System.out.println("Testing expected success of idm check");
-		pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+		//pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
 		
   }
 }

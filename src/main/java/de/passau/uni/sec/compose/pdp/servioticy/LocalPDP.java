@@ -142,7 +142,7 @@ public class LocalPDP implements PDP
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
-			operationID opId, String stream) throws PDPServioticyException 
+			String stream) throws PDPServioticyException 
 			{ 
 			Map<String, Object> tempMapCache = new HashMap<String, Object>();
 			PermissionCacheObject ret = new PermissionCacheObject();			
