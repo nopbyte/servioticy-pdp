@@ -63,7 +63,7 @@ public class ServioticyProvenance
 			throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
 		}
     }
-    public JsonNode getSourceFromSecurityMetaDataJsonNode(JsonNode security) throws PDPServioticyException
+    public JsonNode getSourceFromSecurityMetaDataJsonNode(JsonNode security) 
     {
     	ObjectMapper mapper = new ObjectMapper();
 		JsonNode root = mapper.createObjectNode();			
@@ -96,10 +96,7 @@ public class ServioticyProvenance
 	    	JsonNode security = mapper.readTree(SU_securityMetadata);
 	    	return getSourceFromSecurityMetaDataJsonNode(security).toString();	
 	    	
-    	} catch(PDPServioticyException ex)
-    	{
-    		throw ex;
-    	}
+    	} 
     	catch (JsonProcessingException e) {
 			 throw new PDPServioticyException(500, "Wrong format in security metadata. ", "Wrong parameters. JsonProcessingException for string: "+SU_securityMetadata);
 		} catch (IOException e) {
