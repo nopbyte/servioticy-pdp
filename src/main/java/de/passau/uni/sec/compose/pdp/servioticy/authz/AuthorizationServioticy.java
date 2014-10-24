@@ -61,17 +61,14 @@ public class AuthorizationServioticy
 		 	 // Check if user is allowed to get data from the SO
 			 if(cache.getCache()!=null)
 				 internalCache = (Map<String, Object>) cache.getCache();
-			 if(((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
-			 {
-				 cache.setPermission(false);
-				 return cache;
-			 }
+			
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
 				 if(response ==null)
 				 {
 					 internalCache.put("wrong:"+access_token_user, new Boolean(true));
+					 cache.setCache(internalCache);
 					 cache.setPermission(false);
 					 return cache;
 				 }
@@ -82,6 +79,7 @@ public class AuthorizationServioticy
 				 cache.setCache(e);
 				 return cache;
 			 }
+			
 			// Parse response
 		    ObjectMapper mapperUser = new ObjectMapper();
 		    JsonNode user_data = null;
@@ -98,13 +96,19 @@ public class AuthorizationServioticy
 			}
 			cache.setCache(internalCache);
 		 }
-
+		 if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
+		 {
+			 cache.setPermission(false);
+			 cache.setCache(internalCache);
+			 return cache;
+		 }
 		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
 		 if(owner==null)
 			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
 		 String soOwner = owner.asText();
 		 boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
 		 cache.setPermission(poleval);
+		 cache.setCache(internalCache);
 		return cache;		
 	}
 
@@ -114,7 +118,7 @@ public class AuthorizationServioticy
 	 * @param security_metadata_SO (destination SO)
 	 * @param security_metadata_of_the_SU (input SU)
 	 * @param idmHost
-	 * @param idmUser
+	 * @param idmUser)&&
 	 * @param idmPass
 	 * @param idmPort
 	 * @return returns true or false in the "Permission" entry of the cach object depending on the policy evaluation
@@ -178,11 +182,7 @@ public class AuthorizationServioticy
 		 	 // Check if user is allowed to get data from the SO
 			 if(cache.getCache()!=null)
 				 internalCache = (Map<String, Object>) cache.getCache();
-			 if(((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
-			 {
-				 cache.setPermission(false);
-				 return cache;
-			 }
+			 
 			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
 			 try {
 				 response = com.getInformationForUser(access_token_user);
@@ -190,6 +190,7 @@ public class AuthorizationServioticy
 				 {
 					 internalCache.put("wrong:"+access_token_user, new Boolean(true));
 					 cache.setPermission(false);
+					 cache.setCache(internalCache);
 					 return cache;
 				 }
 				 internalCache.put("wrong:"+access_token_user, new Boolean(false));
@@ -215,7 +216,12 @@ public class AuthorizationServioticy
 			}
 			cache.setCache(internalCache);
 		 }
-
+		 if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
+		 {
+			 cache.setPermission(false);
+			 cache.setCache(internalCache);
+			 return cache;
+		 }
 		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
 		 if(owner==null)
 			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
@@ -224,8 +230,9 @@ public class AuthorizationServioticy
 		 if(cache.getUserId().equals(soOwner))
 		 {
 			 cache.setPermission(true);
+			 cache.setCache(internalCache);
 		 }
-		
+		cache.setCache(internalCache);
 		return cache;				
 	}
 	

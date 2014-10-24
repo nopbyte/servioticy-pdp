@@ -68,7 +68,7 @@ public class TestDeleteData
 				  //ret = ServioticyProvenance.getInitialProvenance(so_data);
 				  // Check the result of the policy evaluation
 				  boolean pdpResult = ret.isPermission();
-				  assertEquals(ret.getUserId(), "92f83ea4-2835-4dce-a34a-5711d948c610");
+				  //assertEquals(ret.getUserId(), "92f83ea4-2835-4dce-a34a-5711d948c610");
 				  assertEquals(true, pdpResult);
 				}
 				System.out.println("end of cache test!");
