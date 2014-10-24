@@ -96,6 +96,10 @@ public class AuthorizationServioticy
 			}
 			cache.setCache(internalCache);
 		 }
+		 else{
+			 internalCache=(Map<String, Object>) cache.getCache();
+
+		 }
 		 if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
 		 {
 			 cache.setPermission(false);
@@ -104,11 +108,14 @@ public class AuthorizationServioticy
 		 }
 		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
 		 if(owner==null)
+		 {
 			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
+		 }
 		 String soOwner = owner.asText();
 		 boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
 		 cache.setPermission(poleval);
 		 cache.setCache(internalCache);
+		
 		return cache;		
 	}
 
@@ -215,6 +222,10 @@ public class AuthorizationServioticy
 				internalCache.put("UserId", userSO.asText());
 			}
 			cache.setCache(internalCache);
+		 }
+		 else
+		 {
+			 internalCache = (Map<String, Object>) cache.getCache();
 		 }
 		 if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
 		 {
