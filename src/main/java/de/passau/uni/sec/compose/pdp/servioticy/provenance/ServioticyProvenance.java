@@ -53,7 +53,7 @@ public class ServioticyProvenance
 			String stringMetaData = "{";
 			// Add security metadata for the SU
 			// build inital provenance data
-			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : \"creation\", \"timestamp\":" + timestamp + ",\"so-stream\"" + stream  + ",\"accessed\":\"\", \"onbehalf\":\"" + owner_id.asText() + "\", \"source\":\"" + source + "\"}";
+			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : \"creation\", \"timestamp\":" + timestamp + ",\"so-stream\":\"" + stream  + "\",\"accessed\":\"\", \"onbehalf\":\"" + owner_id.asText() + "\", \"source\":\"" + source + "\"}";
 			stringMetaData += ",\"policy\":" + policy;
 			stringMetaData += "}";
 			ObjectMapper mapper = new ObjectMapper();

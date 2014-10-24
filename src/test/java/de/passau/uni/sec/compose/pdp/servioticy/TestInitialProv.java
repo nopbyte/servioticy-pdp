@@ -41,7 +41,7 @@ public class TestInitialProv
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadata(token);
 				// Get initial provenance
-				ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+				ret = pdp.SendDataToServiceObjectProv(token, so_data, null, null, "Stream1");
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check initial provenance (if it is a valide JSON doc and if it has the right provenance onbehalf entry)
 				JsonNode retNode = ret.getSecurityMetaData();
@@ -84,7 +84,7 @@ public class TestInitialProv
 	 public  void initialProvenanceFailerNull() throws PDPServioticyException
 	 {
 			String token=UUID.randomUUID().toString();
-			pdp.checkAuthorization(token, null, null, null, PDP.operationID.SendDataToServiceObjectProv);
+			pdp.SendDataToServiceObjectProv(token, null, null, null, "Stream");
 			assertEquals(1, 2);
 	 }
 
@@ -94,7 +94,7 @@ public class TestInitialProv
 			String token=UUID.randomUUID().toString();
 		    	ObjectMapper mapper = new ObjectMapper();
 			JsonNode so_data = mapper.readTree("{\"bla\" : \"blub\"}");
-			PermissionCacheObject ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+			PermissionCacheObject ret = pdp.SendDataToServiceObjectProv(token, so_data, null, null, "Stream1");
 	
 	 }
 

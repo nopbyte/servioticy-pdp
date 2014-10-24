@@ -31,7 +31,7 @@ public class PostDataToServiceObjectFromTheOutside
 			try {
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadata(token);
-				pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+				pdp.SendDataToServiceObjectProv(token, so_data, null, null, "Stream1");
 			} catch (JsonProcessingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -64,7 +64,7 @@ public class PostDataToServiceObjectFromTheOutside
 		    try{
 		    	String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadata("wrong token");
-				pdp.checkAuthorization(UUID.randomUUID().toString(), so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+				pdp.SendDataToServiceObjectProv(UUID.randomUUID().toString(), so_data, null, null, "Stream2");
 		        fail();
 		    }
 		    catch (PDPServioticyException e) 
@@ -103,7 +103,7 @@ public class PostDataToServiceObjectFromTheOutside
 		try {
 			String token=UUID.randomUUID().toString();
 			so_data = buildJsonSoMetadataWithPolicy(token);
-			ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObjectProv);
+			ret = pdp.SendDataToServiceObjectProv(token, so_data, null, null, "Stream1");
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
