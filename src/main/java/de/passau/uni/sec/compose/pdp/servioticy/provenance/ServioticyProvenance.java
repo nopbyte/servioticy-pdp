@@ -55,6 +55,7 @@ public class ServioticyProvenance
 			// build inital provenance data
 			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : \"creation\", \"timestamp\":" + timestamp + ",\"so-stream\":\"" + stream  + "\",\"accessed\":\"\", \"onbehalf\":\"" + owner_id.asText() + "\", \"source\":\"" + source + "\"}";
 			stringMetaData += ",\"policy\":" + policy;
+			stringMetaData += ",\"owner_id\":\"" + owner_id.asText() + "\"";
 			stringMetaData += "}";
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode so_data;
