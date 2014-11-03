@@ -90,12 +90,23 @@ public class LocalPDP implements PDP
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.LaunchActuation)) // this one is only getting so because we do policies on the SO only, not in streams or actuators
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
-		else if(opId.equals(PDP.operationID.UpdateActuation)) 
-			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.UpdateActuation))
+			return updateActuationStatus(token, security_metadata_SO_current);
 		else {
 			throw new PDPServioticyException(501, "The operation is not implemented", "Wrong parameters");			
 		}
 		
+	}
+
+	private PermissionCacheObject updateActuationStatus(String token,
+			JsonNode security_metadata_SO_current)
+			throws PDPServioticyException {
+		//return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		id.verifyWebTokenApiToken(security_metadata_SO_current, token);
+		//if no exception
+		PermissionCacheObject pco = new PermissionCacheObject();
+		pco.setPermission(true);
+		return pco;
 	}
 
 	public IdentityVerifier getId() {
