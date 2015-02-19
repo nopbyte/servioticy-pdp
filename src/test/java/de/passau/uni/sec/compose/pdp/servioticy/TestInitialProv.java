@@ -74,16 +74,16 @@ public class TestInitialProv
 	 public  void basicDispatchPublisher()
 	 {
 		  	PermissionCacheObject ret = new PermissionCacheObject();
-			ret.setChannel("Channel1");
+			ret.setStream("Channel1");
 			ret.setUserId("12345user");
-			String Channel = "";
+			String Stream = "";
 			String User = "";
 		
 			if(ret != null && ret.getCache() instanceof Map)
 			{
 				Map temp = (Map<String, Object>)ret.getCache();
-				if(temp.containsKey("Channel"))
-					Channel = (String)temp.get("Channel");
+				if(temp.containsKey("Stream"))
+					Stream = (String)temp.get("Stream");
 			}
 
 
@@ -95,7 +95,7 @@ public class TestInitialProv
 			}
 			System.out.println("Ret: " + ret.getCache());
 			assertEquals("12345user", User);
-			assertEquals("Channel1", Channel);
+			assertEquals("Channel1", Stream);
 		
 	 }
 	 /**

@@ -58,14 +58,14 @@ public class PermissionCacheObject
 		}
 	}
 
-	public void setChannel(String channel)
+	public void setStream(String stream)
 	{
 		if(this.cache != null && this.cache instanceof Map)
 		{
-			((Map<String, Object>)this.cache).put("Channel", channel);
+			((Map<String, Object>)this.cache).put("Stream", stream);
 		} else {
 			Map<String, Object> tempMapCache = new HashMap<String, Object>();
-			tempMapCache.put("Channel", channel);
+			tempMapCache.put("Stream", stream);
 			this.setCache(tempMapCache);
 		}
 	}
