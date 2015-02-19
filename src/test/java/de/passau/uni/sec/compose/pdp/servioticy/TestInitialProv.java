@@ -22,6 +22,9 @@ import com.jayway.jsonpath.Criteria;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class TestInitialProv 
 {
 	 private PDP pdp; 
@@ -63,6 +66,37 @@ public class TestInitialProv
 			}
   
 			
+	 }
+
+
+
+	 @Test
+	 public  void basicDispatchPublisher()
+	 {
+		  	PermissionCacheObject ret = new PermissionCacheObject();
+			ret.setChannel("Channel1");
+			ret.setUserId("12345user");
+			String Channel = "";
+			String User = "";
+		
+			if(ret != null && ret.getCache() instanceof Map)
+			{
+				Map temp = (Map<String, Object>)ret.getCache();
+				if(temp.containsKey("Channel"))
+					Channel = (String)temp.get("Channel");
+			}
+
+
+			if(ret != null && ret.getCache() instanceof Map)
+			{
+				Map temp = (Map<String, Object>)ret.getCache();
+				if(temp.containsKey("UserId"))
+					User = (String)temp.get("UserId");
+			}
+			System.out.println("Ret: " + ret.getCache());
+			assertEquals("12345user", User);
+			assertEquals("Channel1", Channel);
+		
 	 }
 	 /**
 	  * 

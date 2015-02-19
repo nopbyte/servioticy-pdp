@@ -26,6 +26,7 @@ public interface PDP
 		GetActuations,
 		GetActuationStatus,
 		LaunchActuation,
+		DispatchPublisher,
 		UpdateActuation
 		
 		

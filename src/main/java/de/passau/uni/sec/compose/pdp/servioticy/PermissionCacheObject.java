@@ -1,6 +1,7 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -8,6 +9,8 @@ public class PermissionCacheObject
 {
 	private boolean permission =false;
 	private Object cache;
+
+
 	public boolean isPermission() {
 		return permission;
 	}
@@ -42,4 +45,33 @@ public class PermissionCacheObject
 		}
 		return ret;
 	}
+
+	public void setUserId(String user_id)
+	{
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			((Map<String, Object>)this.cache).put("UserId", user_id);
+		} else {
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			tempMapCache.put("UserId", user_id);
+			this.setCache(tempMapCache);
+		}
+	}
+
+	public void setChannel(String channel)
+	{
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			((Map<String, Object>)this.cache).put("Channel", channel);
+		} else {
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			tempMapCache.put("Channel", channel);
+			this.setCache(tempMapCache);
+		}
+	}
 }
+
+
+
+
+

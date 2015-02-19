@@ -289,6 +289,27 @@ public class AuthorizationServioticy
 		
 	}
 
+	public PermissionCacheObject genericPublicPrivatePolicyNoIDM(JsonNode SU, PermissionCacheObject cache)
+	{
+		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setPermission(false);
+		// Get user id
+		String userId = "";
+		if(cache != null && cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)cache;
+			if(temp.containsKey("UserId"))
+				userId = (String) temp.get("UserId");
+		}
+		// Evaluate policy
+		if(userId!=null)
+		{
+		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SU,userId));
+		}
+		return ret;
+	}
+
+
 	private PermissionCacheObject checkOwner(JsonNode so, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
 		IdentityVerifier idm = new IdentityVerifier();

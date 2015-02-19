@@ -84,6 +84,8 @@ public class LocalPDP implements PDP
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.DeleteSpecificSubscription))
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		else if(opId.equals(PDP.operationID.DispatchPublisher))
+			return authz.genericPublicPrivatePolicyNoIDM(security_metadata_of_the_SU, cache);
 		else if(opId.equals(PDP.operationID.GetActuations))
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.GetActuationStatus))
