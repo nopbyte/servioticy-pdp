@@ -295,12 +295,7 @@ public class AuthorizationServioticy
 		ret.setPermission(false);
 		// Get user id
 		String userId = "";
-		if(cache != null && cache instanceof Map)
-		{
-			Map temp = (Map<String, Object>)cache;
-			if(temp.containsKey("UserId"))
-				userId = (String) temp.get("UserId");
-		}
+		userId = cache.getUserId();
 		// Evaluate policy
 		if(userId!=null)
 		{
