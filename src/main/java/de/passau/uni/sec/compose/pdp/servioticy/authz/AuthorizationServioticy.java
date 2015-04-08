@@ -401,7 +401,7 @@ public class AuthorizationServioticy
 		for (JsonNode currentFlow : flowsSO)
 		{
 			// Get source
-			JsonNode sourceSO = policySO.get("source");
+			JsonNode sourceSO = currentFlow.get("source");
 			if (sourceSO == null) {continue;} //.isValueNode() 
 			// Evaluate policy of SU
 			JsonNode sourceFlowSO = policySO;

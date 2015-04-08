@@ -39,6 +39,40 @@ public class TestDefaultPolicy
 	 }
 	
 	 @Test
+	 public  void wrongUIDinPolicy() throws PDPServioticyException
+	 {
+		  	PermissionCacheObject ret;
+			try {
+				// Generate input
+				String token=UUID.randomUUID().toString();
+				JsonNode so_data = buildJsonSoMetadataPrivate2(token, "123");
+				JsonNode su_data = buildJsonSuMetadataPrivate2("123");
+				// Get initial provenance
+				System.out.println("SO: " + so_data);
+				System.out.println("SU: " + su_data);
+				ret = pdp.checkAuthorization(token, so_data, su_data, null, PDP.operationID.DispatchData);
+				//ret = ServioticyProvenance.getInitialProvenance(so_data);
+				// Check the result of the policy evaluation
+				boolean pdpResult = ret.isPermission();
+				assertEquals(false, pdpResult);
+			} catch (PDPServioticyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				fail();
+			} catch (IOException e) {
+				fail();
+			}
+  
+			
+	 }
+
+
+
+
+
+
+
+	 @Test
 	 public  void defaultpolicyPublic() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
@@ -296,5 +330,39 @@ public class TestDefaultPolicy
 			so_data = mapper.readTree(string);
 			return so_data;
 	}
+
+//...................................................
+	 /**
+	  * 
+	  * @param token
+	  * @return SO with public policy 
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
+	 private JsonNode buildJsonSoMetadataPrivate2(String token, String userid) throws JsonProcessingException, IOException {
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "7\", \"policy\" :[{\"flow\" : { \"target\" : \"userid/" + userid + "\" }},{\"flow\" : { \"source\" : \"userid/" + userid + "\" }}]}}"; 
+		    ObjectMapper mapper = new ObjectMapper();
+		    JsonNode so_data;
+			so_data = mapper.readTree(string);
+			return so_data;
+	}
+
+
+	 /**
+	  * 
+	  * @return Su
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
+	 private JsonNode buildJsonSuMetadataPrivate2(String userid) throws JsonProcessingException, IOException {
+		userid += "7";
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\",\"owner_id\":\""+ userid + "\", \"policy\" :[{\"flow\" : { \"target\" : \"userid/" + userid + "\" }},{\"flow\" : { \"source\" : \"userid/" + userid + "\" }}]}}";
+		    ObjectMapper mapper = new ObjectMapper();
+		    JsonNode so_data;
+			so_data = mapper.readTree(string);
+			return so_data;
+	}
+
+
 
 }
