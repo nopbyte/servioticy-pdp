@@ -52,7 +52,7 @@ public class TestIDMCommunicator
 
 	 }
 	 
-	 @Test
+	 //@Test
 	 public void deleteSO() 
 	 {
 		 try{
