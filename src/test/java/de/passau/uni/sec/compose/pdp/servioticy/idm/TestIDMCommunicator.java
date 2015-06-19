@@ -52,18 +52,18 @@ public class TestIDMCommunicator
 
 	 }
 	 
-	 //@Test
-	 public void deleteSO() throws JsonParseException, IOException
+	 @Test
+	 public void deleteSO() 
 	 {
 		 try{
 			 //add the bearer key word.
-			 access_token_user = "anonymousToken";
+			 access_token_user = "Bearer anonymousToken";
 			 com.deleteSO("http", "localhost", 8080, "so1meid",access_token_user);
 			
 		 }
 		 catch(PDPServioticyException e)
 		 {
-			 //here code could be 401 or 403, and there is always a message...
+			 //here code could be 401 or 403, or 404 and there is always a user message...
 			 //TODO handle:
 			 System.out.println("User message: "+e.getMessage()+" Status: "+e.getStatus()+" Logging info: "+e.getLogInfo());
 			 fail();

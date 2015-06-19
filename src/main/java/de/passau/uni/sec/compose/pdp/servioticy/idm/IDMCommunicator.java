@@ -224,7 +224,7 @@ public class IDMCommunicator {
 		try{
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders header = new HttpHeaders();
-		    header.set("Authorization", "BEARER " + token);
+		    header.set("Authorization", token);
 		    HttpEntity<String> serviceDetails = new HttpEntity<String>(header);
 	
 		    responseEntityDetails = restTemplate.exchange(
@@ -255,7 +255,7 @@ public class IDMCommunicator {
 			RestTemplate digestRestTemplate = digestRestTemplate();
 		 	
 			AuthenticatedEmptyMessage authenticateEmptyMes = new AuthenticatedEmptyMessage();
-			authenticateEmptyMes.setAuthorization("Bearer "+userAccessToken);
+			authenticateEmptyMes.setAuthorization(userAccessToken);
 	        HttpHeaders header = new HttpHeaders();
 	        header.set("If-Unmodified-Since",
 	                String.valueOf(timestampLastModified));
