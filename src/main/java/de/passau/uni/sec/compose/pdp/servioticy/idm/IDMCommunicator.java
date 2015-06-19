@@ -2,8 +2,12 @@ package de.passau.uni.sec.compose.pdp.servioticy.idm;
 
 
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
@@ -14,18 +18,32 @@ import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
+import de.passau.uni.sec.compose.pdp.servioticy.idm.spring.util.DigestHttpComponentsClientHttpRequestFactory;
+import de.passau.uni.sec.compose.pdp.servioticy.idm.spring.util.HttpEntityEnclosingDeleteRequest;
 
 /**
  * This class encapsulates the communication with the Identity Management
@@ -42,6 +60,32 @@ public class IDMCommunicator {
 	 * Target used to send data to IDM
 	 */
 	private HttpHost target;
+	
+	public static RestTemplate digestRestTemplate() {
+        DefaultHttpClient client = new DefaultHttpClient();
+
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
+                "composecontroller", "composecontrollerpassword");
+
+        client.getCredentialsProvider().setCredentials(
+                new AuthScope("localhost", 8080, AuthScope.ANY_REALM),
+                credentials);
+
+        RestTemplate digestRestTemplate = new RestTemplate();
+        digestRestTemplate
+                .setRequestFactory(new DigestHttpComponentsClientHttpRequestFactory(
+                        client) {
+                    @Override
+                    protected HttpUriRequest createHttpUriRequest(
+                            HttpMethod httpMethod, URI uri) {
+                        if (HttpMethod.DELETE == httpMethod) {
+                            return new HttpEntityEnclosingDeleteRequest(uri);
+                        }
+                        return super.createHttpUriRequest(httpMethod, uri);
+                    }
+                });
+        return digestRestTemplate;
+    }
 	
 	private CloseableHttpResponse internalGetToIDM(String uri, Map<String,String> headers ) throws PDPServioticyException
 	{
@@ -175,6 +219,64 @@ public class IDMCommunicator {
 			//log information?
 		}
   }
+	}
+	
+	public void  deleteSO(String protocol, String idmHost, int idmPort, String soid, String token) throws PDPServioticyException
+	{
+		//JsonNode node = so.findValue("lastModified");
+		//JsonNode idNode = so.findValue("id");
+		ResponseEntity<Object> responseEntityDetails =null;
+		try{
+			RestTemplate restTemplate = new RestTemplate();
+			HttpHeaders header = new HttpHeaders();
+		    header.set("Authorization", "BEARER " + token);
+		    HttpEntity<String> serviceDetails = new HttpEntity<String>(header);
+	
+		    responseEntityDetails = restTemplate.exchange(
+		    		 protocol+"://"+idmHost+(idmPort>0?":"+idmPort: "")+"idm/serviceobject/" + soid, HttpMethod.GET,
+		                serviceDetails, Object.class);
+	
+		    @SuppressWarnings("unchecked")
+		    LinkedHashMap<String, Object> soCreateResponse = (LinkedHashMap<String, Object>) responseEntityDetails
+		                .getBody();
+	
+		    if(HttpStatus.OK.equals(responseEntityDetails.getStatusCode()))    
+		    {    
+		        long timestamp = (long) soCreateResponse.get("lastModified");
+		        sendDeleteToIDM(protocol+"://"+idmHost+(idmPort>0?":"+idmPort: "")+"/idm/serviceobject/"+soid,timestamp, token);
+		    }
+		}
+		catch( HttpClientErrorException ex)
+		{
+			//System.err.println(ex.toString());
+			System.err.println("ex:"+ex.getResponseBodyAsString()+" code: "+ex.getStatusText());
+        	throw new PDPServioticyException(ex.getStatusCode().value(), "Error when deleting or reading the Service Object "+ex.getStatusText(), "response from IDM when deleting entity "+ex.getResponseBodyAsString());
+		}
+	}
+	
+	//TODO delete:  curl --digest -u "composecontroller:composecontrollerpassword" -H "If-Unmodified-Since: 1400862183000"   -H "Content-Type: application/json;charset=UTF-8" -d  '{"authorization": "'"Bearer $TOKEN"'"}' -X DELETE http://localhost:8080/idm/serviceobject/so1meid
+	public void  sendDeleteToIDM(String uri, long timestampLastModified, String userAccessToken) throws PDPServioticyException, HttpClientErrorException
+	{
+			RestTemplate digestRestTemplate = digestRestTemplate();
+		 	
+			AuthenticatedEmptyMessage authenticateEmptyMes = new AuthenticatedEmptyMessage();
+			authenticateEmptyMes.setAuthorization("Bearer "+userAccessToken);
+	        HttpHeaders header = new HttpHeaders();
+	        header.set("If-Unmodified-Since",
+	                String.valueOf(timestampLastModified));
+	        HttpEntity<AuthenticatedEmptyMessage> deletionEntity = new HttpEntity<AuthenticatedEmptyMessage>(
+	                authenticateEmptyMes, header);
+
+	        ResponseEntity<Object> responseEntityDeletion = digestRestTemplate
+	                .exchange(uri,
+	                        HttpMethod.DELETE, deletionEntity, Object.class);
+
+	        if(!HttpStatus.OK.equals(responseEntityDeletion.getStatusCode()))
+	        {
+	        	throw new PDPServioticyException(responseEntityDeletion.getStatusCode().value(), "A problem with the connection occurred when deleting, unexpected response code "+responseEntityDeletion.getStatusCode().toString(), "response from IDM when deleting entity "+responseEntityDeletion.getStatusCode().toString()+" response "+responseEntityDeletion.toString());
+	        	//TODO throw exception
+	        }
+	        
 	}
     
 }

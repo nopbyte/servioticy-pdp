@@ -13,6 +13,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 
 public class TestIDMCommunicator 
@@ -27,7 +33,7 @@ public class TestIDMCommunicator
 		  com = new IDMCommunicator("composecontroller", "composecontrollerpassword", "localhost", 8080);
 	 }
 	 
-	 @Test
+	 //@Test
 	 public void getDataFromUserToken()
 	 {
 		 
@@ -46,7 +52,26 @@ public class TestIDMCommunicator
 
 	 }
 	 
-	 @Test
+	 //@Test
+	 public void deleteSO() throws JsonParseException, IOException
+	 {
+		 try{
+			 //add the bearer key word.
+			 access_token_user = "anonymousToken";
+			 com.deleteSO("http", "localhost", 8080, "so1meid",access_token_user);
+			
+		 }
+		 catch(PDPServioticyException e)
+		 {
+			 //here code could be 401 or 403, and there is always a message...
+			 //TODO handle:
+			 System.out.println("User message: "+e.getMessage()+" Status: "+e.getStatus()+" Logging info: "+e.getLogInfo());
+			 fail();
+			 
+		 }
+	 }
+	 
+	 //@Test
 	 public void createSO()
 	 {
 		 try{
