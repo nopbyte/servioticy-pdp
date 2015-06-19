@@ -2,8 +2,6 @@ package de.passau.uni.sec.compose.pdp.servioticy.idm;
 
 
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -18,7 +16,6 @@ import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -38,8 +35,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.spring.util.DigestHttpComponentsClientHttpRequestFactory;
