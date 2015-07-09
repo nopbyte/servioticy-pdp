@@ -40,7 +40,7 @@ public class ServioticyProvenance
 			// extract onbehalf
 			JsonNode owner_id = serviceObjectMetadata.findValue("owner_id");
 			// extract policy
-			JsonNode policy = serviceObjectMetadata.findValue("policy");
+			JsonNode policy = serviceObjectMetadata.findValue("flows");
 	
 			// get source
 			String source = "[]";

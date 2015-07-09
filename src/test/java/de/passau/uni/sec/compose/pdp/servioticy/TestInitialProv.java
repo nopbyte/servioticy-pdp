@@ -50,7 +50,7 @@ public class TestInitialProv
 				JsonNode retNode = ret.getSecurityMetaData();
 				String policy = retNode.findValue("policy").toString();
 				String onbehalf = retNode.findValue("onbehalf").asText();
-				assertEquals("[{\"flow\":{\"forall\":\"entities\",\"target\":\"entities\"}},{\"flow\":{\"forall\":\"entities\",\"source\":\"entities\"}}]", policy);
+				assertEquals("[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]", policy);
 				assertEquals("owner_identifier123123", onbehalf);
 
 
@@ -106,7 +106,8 @@ public class TestInitialProv
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadata(String token) throws JsonProcessingException, IOException {
-		     String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" :[{\"flow\" : { \"forall\" : \"entities\", \"target\" : \"entities\" }},{\"flow\" : { \"forall\" : \"entities\", \"source\" : \"entities\" }}]}";
+		 	String policy = "[{\"object\":{\"type\":\"so\",\"id\":\"123\"},\"flows\":[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]}]";
+		    String string = "{\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" :" + policy + "}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);

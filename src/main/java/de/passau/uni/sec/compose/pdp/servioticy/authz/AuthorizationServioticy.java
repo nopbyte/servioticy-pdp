@@ -317,7 +317,7 @@ public class AuthorizationServioticy
 			String uId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
 			tempMapCache.put("UserId", uId);
 			ret.setCache(tempMapCache);
-			//there is a usen authenticated behind the request
+			//there is a user authenticated behind the request
 			if(uId.equals(owner.asText()))
 				ret.setPermission(true);
 			else
@@ -364,67 +364,49 @@ public class AuthorizationServioticy
 		}
 		
 		// Interate over the flows for the source policy (SU)
-		List<JsonNode> flowsSU = inputSU.findValues("flow");
+		List<JsonNode> flowsSU = inputSU.findValues("flows");
+		if (flowsSU.isEmpty() == true) {flowsSU = inputSU.findValues("policy");}
 		for (JsonNode currentFlow : flowsSU)
 		{
 			// Get target
-			JsonNode targetSU = currentFlow.get("target");
+			JsonNode targetSU = currentFlow.findValue("target");
+			// Get type and id of the target
+			JsonNode typeSU = targetSU.get("type");
+			JsonNode idSU = targetSU.get("id");
+			
 			if (targetSU == null) {continue;}
 			// Evaluate policy of SU
 			JsonNode targetFlowSU = policySU;
-			if (targetSU.asText().contains("userid/"))
+			
+			if (typeSU != null && typeSU.asText().equals("user") && idSU != null && idSU.asText().equals(userSO.asText()))
 			{
-				//System.out.println("User SU: " + targetSU.asText() + " " + userSO.toString());
-				if (targetSU.asText().equals("userid/"+ userSO.toString().substring(1,userSO.toString().length()-1)))
-				{
-					ret = true;
-				}
-				else {
-					return false;
-				}
+				ret = true;
 			}
-			else if (targetSU.asText().equals("entities"))
+			else if (typeSU != null && typeSU.asText().equals("any") && idSU == null)
 			{
-				JsonNode forallSU = currentFlow.get("forall");
-				if (forallSU == null){continue;}		
-				if (forallSU.asText().equals("entities"))
-				{
 					ret = true;
-				} 
-				else {
-					return false;
-				} 
 			}
 		}
+		if (ret == false){return false;};
 		// Interate over the flows for the destination policies (SO)
-		List<JsonNode> flowsSO = SO.findValues("flow");
+		List<JsonNode> flowsSO = SO.findValues("flows");
 		for (JsonNode currentFlow : flowsSO)
 		{
 			// Get source
-			JsonNode sourceSO = currentFlow.get("source");
+			JsonNode sourceSO = currentFlow.findValue("source");
+			// Get type and id of the target
+			JsonNode typeSO = sourceSO.get("type");
+			JsonNode idSO = sourceSO.get("id");
 			if (sourceSO == null) {continue;} //.isValueNode() 
 			// Evaluate policy of SU
 			JsonNode sourceFlowSO = policySO;
-			if (sourceSO.asText().contains("userid/"))
+			if (typeSO != null && typeSO.asText().equals("user") && idSO != null && idSO.asText().equals(userSU.asText()))
 			{
-				if (sourceSO.asText().equals("userid/"+ userSU.toString().substring(1,userSU.toString().length()-1)))
-				{
-					ret = true;
-				}
-				else {
-					return false;
-				}
+				ret = true;
 			}
-			else if (sourceSO.asText().equals("entities"))
+			else if (typeSO != null && typeSO.asText().equals("any") && idSO == null)
 			{
-				JsonNode forallSO = currentFlow.get("forall");		
-				if (forallSO.asText().equals("entities"))
-				{
-					ret = true;
-				} 
-				else {
-					return false;
-				} 
+				ret = true;
 			}
 		}
 		return ret;
@@ -449,36 +431,26 @@ public class AuthorizationServioticy
 		}
 		
 		// Interate over the flows for the source policy (SU)
-		List<JsonNode> flowsSU = SU.findValues("flow");
+		List<JsonNode> flowsSU = SU.findValues("flows");
+		if (flowsSU.isEmpty() == true) {flowsSU = SU.findValues("policy");}
 		for (JsonNode currentFlow : flowsSU)
 		{
 			// Get target
-			JsonNode targetSU = currentFlow.get("target");
+			JsonNode targetSU = currentFlow.findValue("target");
 			if (targetSU == null) {continue;}
 			// Evaluate policy of SU
 			JsonNode targetFlowSU = policySU;
-			if (targetSU.asText().contains("userid/"))
+			// Get type and id of the target
+			JsonNode typeSU = targetSU.get("type");
+			JsonNode idSU = targetSU.get("id");
+
+			if (typeSU.asText().equals("any") && idSU == null)
 			{
-				//System.out.println("User SU: " + targetSU.asText() + " " + user);
-				if (targetSU.asText().equals("userid/"+ user))
-				{
-					ret = true;
-				}
-				else {
-					return false;
-				}
+				return true;
 			}
-			else if (targetSU.asText().equals("entities"))
+			else if (typeSU.asText().equals("user") && idSU.asText().equals(user))
 			{
-				JsonNode forallSU = currentFlow.get("forall");
-				if (forallSU == null){continue;}		
-				if (forallSU.asText().equals("entities"))
-				{
-					ret = true;
-				} 
-				else {
-					return false;
-				} 
+				return true; 
 			}
 		}
 		return ret;
