@@ -17,7 +17,8 @@ public interface PDP
 		DeleteServiceObjectDescription,//delete a service object
 		DeleteSensorUpdateData,// When deleting a data item from 
 		retrieveSOStreams,
-		GetExistingSubscriptionsForStream, 
+		GetExistingSubscriptionsForStream,
+		GetThisSubscriptionInfoForStream,  
 		SearchUpdates, //public or private policy for now
 		CreateNewSubscription,//public or private
 		GetSubscriptions,//public or private

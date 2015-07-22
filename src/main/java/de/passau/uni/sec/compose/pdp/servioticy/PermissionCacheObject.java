@@ -69,6 +69,30 @@ public class PermissionCacheObject
 			this.setCache(tempMapCache);
 		}
 	}
+
+	public void setSubscriptionInfo(String subInfo)
+	{
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			((Map<String, Object>)this.cache).put("SubInfo", subInfo);
+		} else {
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			tempMapCache.put("SubInfo", subInfo);
+			this.setCache(tempMapCache);
+		}
+	}
+
+	public String getSubscriptionInfo()
+	{
+		String ret = null;
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("SubInfo"))
+				ret = (String) temp.get("SubInfo");
+		}
+		return ret;
+	}
 }
 
 

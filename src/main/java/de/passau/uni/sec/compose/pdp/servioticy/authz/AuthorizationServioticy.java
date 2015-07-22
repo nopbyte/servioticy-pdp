@@ -456,6 +456,64 @@ public class AuthorizationServioticy
 		return ret;
 	}
 
+	
+
+	/**
+	 * Checks if a the  
+	 *
+	 * @param security_metadata_SU 
+	 * @param user that wants to access the SU
+	 * @return returns true or false depending on the policy evaluation
+	 */
+	public PermissionCacheObject getThisSubscriptionInfoForStream(String token, String idmHost, String idmUser, String idmPass,int idmPort, PermissionCacheObject cache) {
+		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setPermission(false);
+		
+		// Get subscription info
+		String subInfo = cache.getSubscriptionInfo();
+		// Parse info
+		ObjectMapper mapperUser = new ObjectMapper();
+		JsonNode subInfoJSON = null;
+		try {
+			subInfoJSON = mapperUser.readTree(subInfo);
+		} catch (JsonProcessingException e1) {
+			System.out.println("Could not parse the info of the subscription.");
+			return ret;
+		} catch (IOException e1) {
+			System.out.println("Could not parse the info of the subscription.");
+			return ret;
+		}
+		// Find the owner of the subscription
+		JsonNode userId = subInfoJSON.findValue("userId");
+		if (userId == null)
+		{
+			System.out.println("Could not find the userId in the subscription info.");
+			return ret;
+		}
+		// Get user-id from authToken from idm or out of the cache object
+		String owner = "";
+		if (cache.getUserId() != null) {
+			owner = cache.getUserId();
+		} else {
+			IdentityVerifier idm = new IdentityVerifier();
+			owner = idm.userIdFromToken(token,idmHost, idmUser,idmPass, idmPort);
+		}
+		if (owner != null && owner != "") {
+			ret.setUserId(owner);
+		}
+		// Check if user is owner
+		System.out.println("Owner: " + owner + " usederID: " + userId.asText());
+		if (owner.equals(userId.asText())) {
+			ret.setPermission(true);
+		} 
+
+
+		return ret;
+	}
+
+
+
+
 
 }
 
