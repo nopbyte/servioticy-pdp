@@ -39,7 +39,7 @@ public class TestDeleteData
 	 }
 
 
-	 @Test
+	 //@Test
 	 public  void DeleteServiceObjectDataCacheIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret=null;
@@ -82,7 +82,7 @@ public class TestDeleteData
 	 }
 	 
 	 
-	 @Test
+	 //@Test
 	 public  void DeleteServiceObjectDataCacheNotOKIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;

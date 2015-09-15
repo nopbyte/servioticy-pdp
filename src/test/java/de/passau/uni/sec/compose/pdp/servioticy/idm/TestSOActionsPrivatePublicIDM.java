@@ -35,7 +35,7 @@ public class TestSOActionsPrivatePublicIDM
 	 }
 
 
-	 @Test
+	 //@Test
 	 public  void RetrieveServiceObjectDescriptionCachePublicIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
@@ -68,7 +68,7 @@ public class TestSOActionsPrivatePublicIDM
 			}
 	 }
 
-	 @Test
+	 //@Test
 	 public  void RetrieveServiceObjectDescriptionCachePrivateOKIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
@@ -105,7 +105,7 @@ public class TestSOActionsPrivatePublicIDM
 	 }
 
 	 
-	 @Test
+	 //@Test
 	 public  void RetrieveServiceObjectDescriptionCachePrivateFalseIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;

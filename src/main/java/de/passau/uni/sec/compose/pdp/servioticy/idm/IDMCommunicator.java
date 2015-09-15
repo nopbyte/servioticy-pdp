@@ -237,7 +237,7 @@ public class IDMCommunicator {
 	
 		    if(HttpStatus.OK.equals(responseEntityDetails.getStatusCode()))    
 		    {    
-		        long timestamp = (long) soCreateResponse.get("lastModified");
+		        long timestamp = ((Long) soCreateResponse.get("lastModified")).longValue();
 		        sendDeleteToIDM(protocol+"://"+idmHost+(idmPort>0?":"+idmPort: "")+"/idm/serviceobject/"+soid,timestamp, token);
 		    }
 		}

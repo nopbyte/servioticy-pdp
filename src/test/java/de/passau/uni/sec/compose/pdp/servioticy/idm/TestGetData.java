@@ -35,7 +35,7 @@ public class TestGetData
 	 }
 
 
-	 @Test
+	// @Test
 	 public  void RetrieveServiceObjectDataCachePublicIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret=null;
@@ -78,7 +78,7 @@ public class TestGetData
 
 
 
-	 @Test
+	 //@Test
 	 public  void getUserInfo() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
@@ -112,7 +112,7 @@ public class TestGetData
 			}
 	 }
 	 
-	 @Test
+	 //@Test
 	 public  void getUserInfoNonExistingUser() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;

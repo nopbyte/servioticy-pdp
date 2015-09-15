@@ -35,7 +35,7 @@ public class TestSOActionsOwnerIDM
 	 }
 
 
-	 @Test
+	 //@Test
 	 public  void RetrieveDeleteServiceObjectCacheOKIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
@@ -72,7 +72,7 @@ public class TestSOActionsOwnerIDM
 	 }
 
 
-	 @Test
+	 //@Test
 	 public  void RetrieveDeleteServiceObjectCacheFalseIDM() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
