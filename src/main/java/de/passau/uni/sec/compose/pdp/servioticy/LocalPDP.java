@@ -1,4 +1,6 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
+import iotp.model.communication.DataReceiver;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -153,6 +155,32 @@ public class LocalPDP implements PDP
 		this.idmPort = idmPort;
 	}
 	
+	/**
+	 * New call to include decryption.... if the header is SHA-256:LBS:1, Then the content is decrypted, if not the process occurrs as before 
+	 * @param token
+	 * @param security_metadata_SO_current
+	 * @param security_metadata_of_the_SU
+	 * @param cache
+	 * @param stream
+	 * @param data
+	 * @return
+	 * @throws PDPServioticyException
+	 */
+	public PermissionCacheObject GenericSendDatatoServiceObjectProv(String token,
+			JsonNode security_metadata_SO_current,
+			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
+			String stream,
+			String data) throws PDPServioticyException{
+		if(token.trim().toUpperCase().equals("SHA-256:LBS:1"))//hash algorithm, Left bit shift, 1 bit at a time
+		{
+			PermissionCacheObject pco = new PermissionCacheObject();
+			DataReceiver receiver = new DataReceiver();
+			//TODO implement call to decrypt
+			return pco;
+		}
+		else 
+			return 	SendDataToServiceObjectProv(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, stream);
+	}
 	
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,

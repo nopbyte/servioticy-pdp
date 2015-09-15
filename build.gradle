@@ -32,6 +32,9 @@ dependencies {
      
      //testCompile 'org.springframework:spring-test'
      //testCompile 'junit:junit'
+     
+     //one time password update
+  	 compile files('./src/main/resources/lib/IoTP-0.1.0.jar')
 
 }
 // end::dependencies[]
