@@ -93,6 +93,32 @@ public class PermissionCacheObject
 		}
 		return ret;
 	}
+	
+	
+	public void setDecryptedUpdate(String subInfo)
+	{
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			((Map<String, Object>)this.cache).put("decryptedUpdate", subInfo);
+		} else {
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			tempMapCache.put("decryptedUpdate", subInfo);
+			this.setCache(tempMapCache);
+		}
+	}
+	
+	public String getDecryptedUpdate()
+	{
+		String ret = null;
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("decryptedUpdate"))
+				ret = (String) temp.get("decryptedUpdate");
+		}
+		return ret;
+	}
+	
 }
 
 

@@ -174,6 +174,8 @@ public class LocalPDP implements PDP
 		if(token.trim().toUpperCase().equals("SHA-256:LBS:1"))//hash algorithm, Left bit shift, 1 bit at a time
 		{
 			PermissionCacheObject pco = new PermissionCacheObject();
+			String fakeUpdate = "{ \"latitude\": {        \"current-value\": 50.818395,        \"unit\": \"degrees\"    },    \"longitude\": {        \"current-value\": 4.40313,        \"unit\": \"degrees\"    }}";
+			pco.setDecryptedUpdate(fakeUpdate);
 			DataReceiver receiver = new DataReceiver();
 			//TODO implement call to decrypt
 			return pco;
