@@ -56,14 +56,17 @@ public class IDMCommunicator {
 	 */
 	private HttpHost target;
 	
-	public static RestTemplate digestRestTemplate() {
+	private RestTemplate digestRestTemplate;
+	
+	public static RestTemplate digestRestTemplate(String host, int port, String username, String password) {
+	
         DefaultHttpClient client = new DefaultHttpClient();
 
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                "composecontroller", "composecontrollerpassword");
+                username, password );
 
         client.getCredentialsProvider().setCredentials(
-                new AuthScope("localhost", 8080, AuthScope.ANY_REALM),
+                new AuthScope(host, port, AuthScope.ANY_REALM),
                 credentials);
 
         RestTemplate digestRestTemplate = new RestTemplate();
@@ -135,6 +138,8 @@ public class IDMCommunicator {
 		 this.httpclient = HttpClients.custom()
 	                .setDefaultCredentialsProvider(credsProvider)
 	                .build();
+		 
+		this.digestRestTemplate = digestRestTemplate(host, port, username, password);
 	       
 	}
 	
@@ -213,13 +218,11 @@ public class IDMCommunicator {
 			} catch (IOException e) {
 			//log information?
 		}
-  }
+      }
 	}
 	
 	public void  deleteSO(String protocol, String idmHost, int idmPort, String soid, String token) throws PDPServioticyException
 	{
-		//JsonNode node = so.findValue("lastModified");
-		//JsonNode idNode = so.findValue("id");
 		ResponseEntity<Object> responseEntityDetails =null;
 		try{
 			RestTemplate restTemplate = new RestTemplate();
@@ -228,7 +231,7 @@ public class IDMCommunicator {
 		    HttpEntity<String> serviceDetails = new HttpEntity<String>(header);
 	
 		    responseEntityDetails = restTemplate.exchange(
-		    		 protocol+"://"+idmHost+(idmPort>0?":"+idmPort: "")+"idm/serviceobject/" + soid, HttpMethod.GET,
+		    		 protocol+"://"+idmHost+(idmPort>0?":"+idmPort: "")+"/idm/serviceobject/" + soid, HttpMethod.GET,
 		                serviceDetails, Object.class);
 	
 		    @SuppressWarnings("unchecked")
@@ -252,7 +255,7 @@ public class IDMCommunicator {
 	//TODO delete:  curl --digest -u "composecontroller:composecontrollerpassword" -H "If-Unmodified-Since: 1400862183000"   -H "Content-Type: application/json;charset=UTF-8" -d  '{"authorization": "'"Bearer $TOKEN"'"}' -X DELETE http://localhost:8080/idm/serviceobject/so1meid
 	public void  sendDeleteToIDM(String uri, long timestampLastModified, String userAccessToken) throws PDPServioticyException, HttpClientErrorException
 	{
-			RestTemplate digestRestTemplate = digestRestTemplate();
+	
 		 	
 			AuthenticatedEmptyMessage authenticateEmptyMes = new AuthenticatedEmptyMessage();
 			authenticateEmptyMes.setAuthorization(userAccessToken);
