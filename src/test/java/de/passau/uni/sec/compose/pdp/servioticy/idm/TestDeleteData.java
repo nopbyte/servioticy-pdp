@@ -24,7 +24,7 @@ public class TestDeleteData
 {
 	 private static final String IDM_USER = "component";
 	private static final int IDM_PORT = 8080;
-	private static final String IDM_PASS = "ZXJpZHMiLCJ";
+	private static final String IDM_PASS = "dummyTest";
 	private static final String IDM_HOST = "132.231.11.217";
 	private PDP pdp;
 
