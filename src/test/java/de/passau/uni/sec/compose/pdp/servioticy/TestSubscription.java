@@ -88,7 +88,7 @@ public class TestSubscription
 	 public  void getSubscriptionInfoIdmTrue() throws PDPServioticyException
 	 {
 			// Get Accesstoken from IDM
-			IDMCommunicator com = new IDMCommunicator("component", "ZXJpZHMiLCJ", "idm4.147.83.30.133.xip.io", 80);
+			IDMCommunicator com = new IDMCommunicator("component", "dummyTest", "idm4.147.83.30.133.xip.io", 80);
 			try {
 
 				CloseableHttpResponse responsePost = com.sendPostToIDM("/auth/user/","{\"username\" : \"servioticyTest\",\"password\" : \"pass\"}");

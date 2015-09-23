@@ -30,7 +30,7 @@ public class TestSOActionsPrivatePublicIDM
 		 pdp = new LocalPDP();
 		 pdp.setIdmUser("component");
 		 pdp.setIdmPort(8080);
-		 pdp.setIdmPassword("ZXJpZHMiLCJ");
+		 pdp.setIdmPassword("dummyTest");
 		 pdp.setIdmHost("132.231.11.217");
 	 }
 
@@ -44,7 +44,7 @@ public class TestSOActionsPrivatePublicIDM
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPublic(token);
 				// Get token
-				 IDMCommunicator com = new IDMCommunicator("component", "ZXJpZHMiLCJ", "132.231.11.217", 8080);
+				 IDMCommunicator com = new IDMCommunicator("component", "dummyTest", "132.231.11.217", 8080);
 				CloseableHttpResponse responsePost = com.sendPostToIDM("/auth/user/","{\"username\" : \"test2\",\"password\" : \"pass\"}");
 				ObjectMapper mapper = new ObjectMapper();
 			    JsonNode response = mapper.readTree(EntityUtils.toString(responsePost.getEntity()));
@@ -75,7 +75,7 @@ public class TestSOActionsPrivatePublicIDM
 			try {
 				
 				/// Get token
-				 IDMCommunicator com = new IDMCommunicator("component", "ZXJpZHMiLCJ", "132.231.11.217", 8080);
+				 IDMCommunicator com = new IDMCommunicator("component", "dummyTest", "132.231.11.217", 8080);
 				CloseableHttpResponse responsePost = com.sendPostToIDM("/auth/user/","{\"username\" : \"test2\",\"password\" : \"pass\"}");
 				ObjectMapper mapper = new ObjectMapper();
 			    JsonNode response;
@@ -112,7 +112,7 @@ public class TestSOActionsPrivatePublicIDM
 			try {
 				
 				/// Get token
-				 IDMCommunicator com = new IDMCommunicator("component", "ZXJpZHMiLCJ", "132.231.11.217", 8080);
+				 IDMCommunicator com = new IDMCommunicator("component", "dummyTest", "132.231.11.217", 8080);
 				CloseableHttpResponse responsePost = com.sendPostToIDM("/auth/user/","{\"username\" : \"test2\",\"password\" : \"pass\"}");
 				ObjectMapper mapper = new ObjectMapper();
 			    JsonNode response;
