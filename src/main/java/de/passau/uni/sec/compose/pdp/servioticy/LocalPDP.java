@@ -171,17 +171,21 @@ public class LocalPDP implements PDP
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String stream,
 			String data) throws PDPServioticyException{
+		PermissionCacheObject pco = null;
 		if(token.trim().toUpperCase().equals("SHA-256:LBS:1"))//hash algorithm, Left bit shift, 1 bit at a time
 		{
-			PermissionCacheObject pco = new PermissionCacheObject();
+			pco = new PermissionCacheObject();
 			String fakeUpdate = "{ \"latitude\": {        \"current-value\": 50.818395,        \"unit\": \"degrees\"    },    \"longitude\": {        \"current-value\": 4.40313,        \"unit\": \"degrees\"    }}";
 			pco.setDecryptedUpdate(fakeUpdate);
 			DataReceiver receiver = new DataReceiver();
 			//TODO implement call to decrypt
 			return pco;
 		}
-		else 
-			return 	SendDataToServiceObjectProv(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, stream);
+		else{ 
+			pco =  SendDataToServiceObjectProv(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, stream);
+			pco.setDecryptedUpdate(data);
+			return pco;
+		}
 	}
 	
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
