@@ -48,6 +48,23 @@ public interface PDP
 			JsonNode security_metadata_of_the_SU,
 			PermissionCacheObject cache,
 			 operationID opId) throws PDPServioticyException;
+	
+	/**
+	 * To support encryption.
+	 * @param token
+	 * @param security_metadata_SO_current
+	 * @param security_metadata_of_the_SU
+	 * @param cache
+	 * @param stream
+	 * @param data
+	 * @return
+	 * @throws PDPServioticyException
+	 */
+	public PermissionCacheObject GenericSendDatatoServiceObjectProv(String token,
+			JsonNode security_metadata_SO_current,
+			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
+			String stream,
+			String data) throws PDPServioticyException;
 
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,
