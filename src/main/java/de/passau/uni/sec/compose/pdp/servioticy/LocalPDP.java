@@ -1,10 +1,16 @@
 package de.passau.uni.sec.compose.pdp.servioticy;
 import iotp.model.communication.DataReceiver;
+import iotp.model.exception.IOTPException;
+import iotp.model.storage.StorageProviderFactory;
+import iotp.model.utils.Utils;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
@@ -26,10 +32,13 @@ public class LocalPDP implements PDP
 	
 	private AuthorizationServioticy authz;
 	
+	private ObjectMapper  mapper;
+	
 	public LocalPDP()
 	{
 		id = new IdentityVerifier();
 		 authz = new AuthorizationServioticy();
+		 mapper = new ObjectMapper();
 	}
 	
 	@Override
@@ -175,10 +184,28 @@ public class LocalPDP implements PDP
 		if(token.trim().toUpperCase().equals("SHA-256:LBS:1"))//hash algorithm, Left bit shift, 1 bit at a time
 		{
 			pco = new PermissionCacheObject();
-			String fakeUpdate = "{ \"latitude\": {        \"current-value\": 50.818395,        \"unit\": \"degrees\"    },    \"longitude\": {        \"current-value\": 4.40313,        \"unit\": \"degrees\"    }}";
-			pco.setDecryptedUpdate(fakeUpdate);
-			DataReceiver receiver = new DataReceiver();
-			//TODO implement call to decrypt
+			try
+			{
+				DataReceiver dr = new DataReceiver(StorageProviderFactory.PROVIDER_SERVIOTICY, null);
+				byte[] dec = dr.decryptMessage(Utils.fromHexStringToBinary(data));
+				String res = new String(dec);
+				mapper.readTree(res);
+				//no exception means everything went OK.
+				pco.setDecryptedUpdate(res);
+				
+			} catch (IOTPException e)
+			{
+				throw new PDPServioticyException(400, "Problem decrypting data. "+e.getMessage(), "Problem decrypting data. "+e.getMessage()+" debug info: "+e.getDebugMessage());
+		
+			} catch (JsonProcessingException e)
+			{
+				throw new PDPServioticyException(400, "Problem decrypting data. Either your data is incorrect or you are not sending the stream JSON object", "Problem decrypting data. Either your data is incorrect or you are not sending the stream JSON object");
+
+			} catch (IOException e)
+			{
+				throw new PDPServioticyException(400, "Problem decrypting data. I/O exception while parsing JSON (is it JSON actually?)","Problem decrypting data. I/O exception while parsing JSON (is it JSON actually?)");
+			}
+			
 			return pco;
 		}
 		else{ 
