@@ -186,12 +186,20 @@ public class LocalPDP implements PDP
 			pco = new PermissionCacheObject();
 			try
 			{
+				Map<String, Object> tempMapCache = new HashMap<String, Object>();
 				DataReceiver dr = new DataReceiver(StorageProviderFactory.PROVIDER_SERVIOTICY, null);
 				byte[] dec = dr.decryptMessage(Utils.fromHexStringToBinary(data));
 				String res = new String(dec);
 				mapper.readTree(res);
 				//no exception means everything went OK.
 				pco.setDecryptedUpdate(res);
+				try{
+					tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
+				} catch (Exception e) {
+					throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
+				    
+				}
+				pco.setCache(tempMapCache);
 				
 			} catch (IOTPException e)
 			{
