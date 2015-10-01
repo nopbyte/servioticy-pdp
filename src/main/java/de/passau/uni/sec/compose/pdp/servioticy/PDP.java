@@ -70,6 +70,7 @@ public interface PDP
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String stream) throws PDPServioticyException; 
+	
 	public String getIdmHost();
 	public void setIdmHost(String idmHost);
 	public String getIdmUser();
@@ -78,7 +79,9 @@ public interface PDP
 	public void setIdmPassword(String idmPassword);
 	public int getIdmPort();
 	public void setIdmPort(int idmPort);
-
+	public String getServioticyPrivateHost();
+	public void setServioticyPrivateHost(String Host);
+	
 
 }
 

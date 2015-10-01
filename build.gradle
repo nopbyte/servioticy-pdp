@@ -30,6 +30,12 @@ dependencies {
      testCompile 'org.springframework:spring-test:3.2.3.RELEASE'
      testCompile 'junit:junit:4.10'
      
+  	 testCompile 'commons-codec:commons-codec:1.10'
+  	 testCompile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
+  	 testCompile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.0'
+  	 testCompile 'org.bouncycastle:bcprov-jdk15on:1.52'
+     
+     
      //testCompile 'org.springframework:spring-test'
      //testCompile 'junit:junit'
      
@@ -41,6 +47,7 @@ dependencies {
 
 test{
  exclude 'de/passau/uni/sec/compose/pdp/servioticy/idm/TestIDMCommunicator**'
+ exclude 'de/passau/uni/sec/compose/pdp/servioticy/TestOTP**'
 }
 // tag::wrapper[]
 task wrapper(type: Wrapper) {

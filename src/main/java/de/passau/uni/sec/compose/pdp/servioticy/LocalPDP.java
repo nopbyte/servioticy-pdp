@@ -2,6 +2,8 @@ package de.passau.uni.sec.compose.pdp.servioticy;
 import iotp.model.communication.DataReceiver;
 import iotp.model.exception.IOTPException;
 import iotp.model.storage.StorageProviderFactory;
+import iotp.model.storage.model.DecryptResult;
+import iotp.model.storage.model.EncodedUser;
 import iotp.model.utils.Utils;
 
 import java.io.IOException;
@@ -20,6 +22,8 @@ import de.passau.uni.sec.compose.pdp.servioticy.provenance.ServioticyProvenance;
 public class LocalPDP implements PDP
 {
 
+	private DataReceiver receiver = null;
+	
 	private IdentityVerifier id;
 	
 	private String idmHost;
@@ -33,6 +37,8 @@ public class LocalPDP implements PDP
 	private AuthorizationServioticy authz;
 	
 	private ObjectMapper  mapper;
+	
+	private String apiUrl;
 	
 	public LocalPDP()
 	{
@@ -164,6 +170,7 @@ public class LocalPDP implements PDP
 		this.idmPort = idmPort;
 	}
 	
+	
 	/**
 	 * New call to include decryption.... if the header is SHA-256:LBS:1, Then the content is decrypted, if not the process occurrs as before 
 	 * @param token
@@ -181,24 +188,27 @@ public class LocalPDP implements PDP
 			String stream,
 			String data) throws PDPServioticyException{
 		PermissionCacheObject pco = null;
-		if(token.trim().toUpperCase().equals("SHA-256:LBS:1"))//hash algorithm, Left bit shift, 1 bit at a time
+		if(token.trim().toUpperCase().equals("SHA-256:LBS:8"))//hash algorithm, Left bit shift, 8 bits at a time
 		{
 			pco = new PermissionCacheObject();
 			try
 			{
 				Map<String, Object> tempMapCache = new HashMap<String, Object>();
-				DataReceiver dr = new DataReceiver(StorageProviderFactory.PROVIDER_SERVIOTICY, null);
-				byte[] dec = dr.decryptMessage(Utils.fromHexStringToBinary(data));
-				String res = new String(dec);
+				DataReceiver dr = getDataReceiver();
+				DecryptResult resultObject = dr.decryptMessageAndGetUserData(Utils.fromHexStringToBinary(data));
+				String res = new String(resultObject.getDecryptedMessage());
 				mapper.readTree(res);
-				//no exception means everything went OK.
 				pco.setDecryptedUpdate(res);
-				try{
+				EncodedUser u = resultObject.getUser();
+				if(!authz.evaluatePolicy(u, security_metadata_SO_current, stream))
+						throw new PDPServioticyException(403, "user" +u.getId()+" cannot send data to this Service Object", "user" +u.getId()+" cannot send data to this Service Object");
+				 try{
 					tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
 				} catch (Exception e) {
 					throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
 				    
 				}
+				pco.setPermission(true);// no exception means everything is OK
 				pco.setCache(tempMapCache);
 				
 			} catch (IOTPException e)
@@ -223,6 +233,17 @@ public class LocalPDP implements PDP
 		}
 	}
 	
+	private  DataReceiver getDataReceiver() throws IOTPException
+	{
+		if(receiver == null){
+			Map<String,Object> iotpParams = new HashMap<String,Object>();
+			iotpParams.put("servioticy.url.otp", "info");
+			iotpParams.put("servioticy.private.url",this.apiUrl);
+			receiver = new DataReceiver(StorageProviderFactory.PROVIDER_SERVIOTICY, iotpParams);
+		}
+		return receiver;
+	}
+
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
@@ -253,6 +274,20 @@ public class LocalPDP implements PDP
 			ret.setCache(tempMapCache);
 			return ret;	
 
+	}
+
+	@Override
+	public String getServioticyPrivateHost()
+	{
+		return apiUrl;
+		
+	}
+
+	@Override
+	public void setServioticyPrivateHost(String Host)
+	{
+		this.apiUrl = Host;
+		 
 	}
 	
 	

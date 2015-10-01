@@ -3,6 +3,8 @@ package de.passau.uni.sec.compose.pdp.servioticy.authz;
 
 
 
+import iotp.model.storage.model.EncodedUser;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -511,7 +513,22 @@ public class AuthorizationServioticy
 		return ret;
 	}
 
+	/**
+	 * This method gets the user information from user, and the normal parameters 
+	 * @param user
+	 * @param security_metadata_SO_current
+	 * @param cache 
+	 * @param stream
+	 */
+	public boolean evaluatePolicy(EncodedUser user, JsonNode security_metadata_SO_current,
+			String stream) throws PDPServioticyException{
+		
+		if(user.getId().equals("-1")) // for testing purposes...
+			return false;
+		return true;
+		
 
+	}
 
 
 
