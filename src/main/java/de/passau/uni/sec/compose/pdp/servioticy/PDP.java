@@ -64,7 +64,7 @@ public interface PDP
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String stream,
-			String data) throws PDPServioticyException;
+			JsonNode data) throws PDPServioticyException;
 
 	public PermissionCacheObject SendDataToServiceObjectProv(String token,
 			JsonNode security_metadata_SO_current,

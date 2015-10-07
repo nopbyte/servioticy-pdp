@@ -95,7 +95,7 @@ public class PermissionCacheObject
 	}
 	
 	
-	public void setDecryptedUpdate(String subInfo)
+	public void setDecryptedUpdate(JsonNode subInfo)
 	{
 		if(this.cache != null && this.cache instanceof Map)
 		{
@@ -107,14 +107,14 @@ public class PermissionCacheObject
 		}
 	}
 	
-	public String getDecryptedUpdate()
+	public JsonNode getDecryptedUpdate()
 	{
-		String ret = null;
+		JsonNode ret = null;
 		if(this.cache != null && this.cache instanceof Map)
 		{
 			Map temp = (Map<String, Object>)this.cache;
 			if(temp.containsKey("decryptedUpdate"))
-				ret = (String) temp.get("decryptedUpdate");
+				ret = (JsonNode) temp.get("decryptedUpdate");
 		}
 		return ret;
 	}

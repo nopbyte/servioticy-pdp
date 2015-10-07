@@ -17,6 +17,7 @@ import iotp.model.utils.Utils;
 import iotp.service.otp.Cipher;
 import iotp.service.otp.SecretDerivatorFactory;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +30,12 @@ public class TestOTP
 {
 	String url = "http://localhost:8080/private/security/";
 	
+	ObjectMapper mapper = null;
+	@Before
+	public void setup ()
+	{
+		mapper = new ObjectMapper();
+	}
 	@Test
 	public void TestSendAndReceiveSmall() throws IOTPException, JsonProcessingException, IOException
 	{
@@ -67,10 +74,16 @@ public class TestOTP
 			DataSender ds = new DataSender(data2);
 			int i = 0;
 			while(i++<40){
-				byte [] r = ds.encryptMessage(Utils.binaryFromUTF8String("{\"someProperty\":3}"));
+				String message = " {      \"location\": {            \"current-value\": \"37.9641611271,-3.31369596285\"          },      \"temperature\": {            \"current-value\": 20.56          }    }";
+				byte [] r = ds.encryptMessage(Utils.binaryFromUTF8String(message));
+				JsonNode update = mapper.readTree("{\"lastUpdate\":123,\"channels\":\""+Utils.fromBinaryToHexString(r)+"\"}");
+				System.out.println(Utils.fromBinaryToHexString(r));
+				
 				try
 				{
-					pdp.GenericSendDatatoServiceObjectProv("SHA-256:LBS:8", generateSecurityMetadata("soid", "a"), null, null, "a", Utils.fromBinaryToHexString(r));
+					PermissionCacheObject pco = pdp.GenericSendDatatoServiceObjectProv("SHA-256:LBS:8", generateSecurityMetadata("soid", "a"), null, null, "a", update);
+					JsonNode expect = mapper.readTree("{\"lastUpdate\":123,\"channels\":"+message+"}");
+					assertTrue(pco.getDecryptedUpdate().equals(expect));
 				} catch (PDPServioticyException e)
 				{
 					assertTrue(false);
@@ -125,10 +138,12 @@ public class TestOTP
 			DataSender ds = new DataSender(data2);
 			int i = 0;
 			while(i++<40){
-				byte [] r = ds.encryptMessage(Utils.binaryFromUTF8String("{\"someProperty\":3}"));
+				String message = " {      \"location\": {            \"current-value\": \"37.9641611271,-3.31369596285\"          },      \"temperature\": {            \"current-value\": 20.56          }    }";
+				byte [] r = ds.encryptMessage(Utils.binaryFromUTF8String(message));
+				JsonNode update = mapper.readTree("{\"lastUpdate\":123,\"channels\":\""+Utils.fromBinaryToHexString(r)+"\"}");
 				try
 				{
-					pdp.GenericSendDatatoServiceObjectProv("SHA-256:LBS:8", generateSecurityMetadata("soid", "a"), null, null, "a", Utils.fromBinaryToHexString(r));
+					pdp.GenericSendDatatoServiceObjectProv("SHA-256:LBS:8", generateSecurityMetadata("soid", "a"), null, null, "a", update);
 				} catch (PDPServioticyException e)
 				{
 					e.printStackTrace();

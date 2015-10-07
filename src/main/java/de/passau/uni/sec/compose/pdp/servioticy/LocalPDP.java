@@ -13,6 +13,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
@@ -186,30 +187,32 @@ public class LocalPDP implements PDP
 			JsonNode security_metadata_SO_current,
 			JsonNode security_metadata_of_the_SU, PermissionCacheObject cache,
 			String stream,
-			String data) throws PDPServioticyException{
+			JsonNode update) throws PDPServioticyException{
 		PermissionCacheObject pco = null;
 		if(token.trim().toUpperCase().equals("SHA-256:LBS:8"))//hash algorithm, Left bit shift, 8 bits at a time
 		{
 			pco = new PermissionCacheObject();
 			try
 			{
-				Map<String, Object> tempMapCache = new HashMap<String, Object>();
+				
 				DataReceiver dr = getDataReceiver();
+				String data = update.get("channels").asText();
 				DecryptResult resultObject = dr.decryptMessageAndGetUserData(Utils.fromHexStringToBinary(data));
 				String res = new String(resultObject.getDecryptedMessage());
-				mapper.readTree(res);
-				pco.setDecryptedUpdate(res);
+				JsonNode channels = mapper.readTree(res);
+				ObjectNode n = (ObjectNode) update;
+				n.put("channels",channels);
+				pco.setDecryptedUpdate(update);
 				EncodedUser u = resultObject.getUser();
 				if(!authz.evaluatePolicy(u, security_metadata_SO_current, stream))
 						throw new PDPServioticyException(403, "user" +u.getId()+" cannot send data to this Service Object", "user" +u.getId()+" cannot send data to this Service Object");
 				 try{
-					tempMapCache.put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
+					((Map<String, Object>) pco.getCache()).put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
 				} catch (Exception e) {
 					throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
 				    
 				}
-				pco.setPermission(true);// no exception means everything is OK
-				pco.setCache(tempMapCache);
+				pco.setPermission(true);// no exception means everything is OK				
 				
 			} catch (IOTPException e)
 			{
@@ -228,7 +231,7 @@ public class LocalPDP implements PDP
 		}
 		else{ 
 			pco =  SendDataToServiceObjectProv(token, security_metadata_SO_current, security_metadata_of_the_SU, cache, stream);
-			pco.setDecryptedUpdate(data);
+			pco.setDecryptedUpdate(update);
 			return pco;
 		}
 	}
