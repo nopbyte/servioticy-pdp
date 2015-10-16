@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import iotp.model.storage.model.EncodedUser;
+
 import java.io.IOException;
 import java.security.Timestamp;
 import java.util.Date;
@@ -73,6 +75,59 @@ public class ServioticyProvenance
 			throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
 		}
     }
+    
+    /*
+     * Generate initial provenance with a encoded user (OTP)
+     */
+    public static JsonNode getInitialProvenance(JsonNode serviceObjectMetadata, String stream, EncodedUser u) throws PDPServioticyException
+    {
+	//JsonNode ret = rootNode.path("provenance");
+		if (serviceObjectMetadata != null)
+		{
+			// extract entity
+			JsonNode entityJSON = serviceObjectMetadata.findValue("id");
+	
+			// extract onbehalf
+			JsonNode owner_id = serviceObjectMetadata.findValue("owner_id");
+			String onbehalf = owner_id.asText();
+			if (u != null && u.getId() != null && u.getId() != ""){
+				onbehalf = u.getId();
+			}
+			// extract policy
+			JsonNode policy = serviceObjectMetadata.findValue("flows");
+	
+			// get source
+			String source = "[]";
+	
+			// generate timestamp
+			Date date= new Date();
+			long time = date.getTime();
+			String timestamp = Long.toString(time);
+	
+			String stringMetaData = "{";
+			// Add security metadata for the SU
+			// build inital provenance data
+			stringMetaData +=  "\"provenance\":{\"agent\" : \"SO\", \"type\": \"sensor_update\", \"entity\":\""+ entityJSON.asText() + "\", \"activity\" : [], \"timestamp\":" + timestamp + ",\"so-stream\":\"" + stream  + "\",\"accessed\":[], \"onbehalf\":\"" + onbehalf + "\", \"source\":" + source + "}";
+			stringMetaData += ",\"policy\":" + policy;
+			stringMetaData += ",\"owner_id\":\"" + owner_id.asText() + "\"";
+			stringMetaData += "}";
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode so_data;
+			try{
+				so_data = mapper.readTree(stringMetaData);
+				return so_data;
+			}
+			catch (IOException e)
+			{
+				throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
+			}
+		}
+		else
+		{
+			throw new PDPServioticyException(400, "The parameters for SendDataToServiceObject were wrong. ", "Wrong parameters");
+		}
+    }
+    
     public JsonNode getSourceFromSecurityMetaDataJsonNode(JsonNode security) 
     {
     	ObjectMapper mapper = new ObjectMapper();
