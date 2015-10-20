@@ -3,8 +3,6 @@ package de.passau.uni.sec.compose.pdp.servioticy;
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException.*;
 
-import iotp.model.storage.model.EncodedUser;
-
 import java.io.IOException;
 import java.util.UUID;
 import java.util.List;
@@ -55,6 +53,9 @@ public class TestInitialProv
 				assertEquals("[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]", policy);
 				assertEquals("owner_identifier123123", onbehalf);
 
+
+
+
 				//ret = pdp.checkAuthorization(token, so_data, null, null, PDP.operationID.SendDataToServiceObject);
 			} catch (PDPServioticyException e) {
 				// TODO Auto-generated catch block
@@ -62,32 +63,9 @@ public class TestInitialProv
 				fail();
 			} catch (IOException e) {
 				fail();
-			}	
-	 }
-	 
-	 @Test
-	 public  void initialProvenanceOTP() throws PDPServioticyException
-	 {
-			try {
-				// Generate initial provenance for the OTP
-				EncodedUser x = new EncodedUser();
-				x.setId("asd");
-				String token=UUID.randomUUID().toString();
-				JsonNode so_data = buildJsonSoMetadata(token);
-				// Get initial provenance
-				JsonNode retNode = ServioticyProvenance.getInitialProvenance(so_data, "test", x);
-				// Check initial provenance (if it is a valide JSON doc and if it has the right provenance onbehalf entry)
-				String policy = retNode.findValue("policy").toString();
-				String onbehalf = retNode.findValue("onbehalf").asText();
-				assertEquals("[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]", policy);
-				assertEquals("asd", onbehalf);
-			} catch (PDPServioticyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				fail();
-			} catch (IOException e) {
-				fail();
-			}	
+			}
+  
+			
 	 }
 
 
