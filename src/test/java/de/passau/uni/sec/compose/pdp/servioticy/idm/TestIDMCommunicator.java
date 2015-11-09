@@ -206,6 +206,17 @@ public class TestIDMCommunicator
 			 System.out.println("User message: "+e.getMessage()+" Status: "+e.getStatus()+" Logging info: "+e.getLogInfo());
 		 }     		
 	 }
+	 
+	 //@Test
+	 public void testGetUserInfoById() throws PDPServioticyException
+	 {
+		 String id  = "746a13fd-8dc1-4aeb-afae-ebf5d7720056";
+		 String res = this.com.getInformationForUserById(null, id);
+		 System.out.println("result: "+res);
+		 
+		 res = this.com.getInformationforAnyId(null, id);
+		 System.out.println("result: "+res);
+	 }
 	 @After
 	 public void cleanUp()
 	 {

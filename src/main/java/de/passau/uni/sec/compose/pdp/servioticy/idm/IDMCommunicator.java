@@ -221,6 +221,62 @@ public class IDMCommunicator {
       }
 	}
 	
+	public String getInformationForUserById(String accessToken, String id) throws PDPServioticyException
+	{
+		if(accessToken == null)
+				accessToken = "anonymousToken";
+		Map<String,String> headers = new HashMap<String, String>();
+		headers.put("Authorization","Bearer "+accessToken);
+		headers.put("Content-Type","application/json;charset=UTF-8");
+		CloseableHttpResponse res = internalGetToIDM("/idm/user/"+id+"/", headers);
+		try {
+			 if(res.getStatusLine().getStatusCode()!=200)
+				 return null;
+			String ret =  EntityUtils.toString(res.getEntity());
+			
+			return ret;
+		} catch (ParseException e) {
+			throw new PDPServioticyException(500, "A problem with the connection occurred, response from COMPOSE IDM could not be parsed", "response from IDM could not be parsed");
+		} catch (IOException e) {
+			throw new PDPServioticyException(500, "there is an HTTP protocol problem when calling COMPOSE IDM", "there is an HTTP protocol problem ");
+		}	
+		finally{
+			try {
+				((CloseableHttpResponse) res).close();
+			} catch (IOException e) {
+			//log information?
+		}
+      }
+	}
+	
+	public String getInformationforAnyId(String accessToken, String id) throws PDPServioticyException
+	{
+		if(accessToken == null)
+				accessToken = "anonymousToken";
+		Map<String,String> headers = new HashMap<String, String>();
+		headers.put("Authorization","Bearer "+accessToken);
+		headers.put("Content-Type","application/json;charset=UTF-8");
+		CloseableHttpResponse res = internalGetToIDM("/idm/any/"+id+"/", headers);
+		try {
+			 if(res.getStatusLine().getStatusCode()!=200)
+				 return null;
+			String ret =  EntityUtils.toString(res.getEntity());
+			
+			return ret;
+		} catch (ParseException e) {
+			throw new PDPServioticyException(500, "A problem with the connection occurred, response from COMPOSE IDM could not be parsed", "response from IDM could not be parsed");
+		} catch (IOException e) {
+			throw new PDPServioticyException(500, "there is an HTTP protocol problem when calling COMPOSE IDM", "there is an HTTP protocol problem ");
+		}	
+		finally{
+			try {
+				((CloseableHttpResponse) res).close();
+			} catch (IOException e) {
+			//log information?
+		}
+      }
+	}
+	
 	public void  deleteSO(String protocol, String idmHost, int idmPort, String soid, String token) throws PDPServioticyException
 	{
 		ResponseEntity<Object> responseEntityDetails =null;
