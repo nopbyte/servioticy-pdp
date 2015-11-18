@@ -76,6 +76,34 @@ public class TestDefaultPolicy
 	 public  void defaultpolicyPublic() throws PDPServioticyException
 	 {
 		  	PermissionCacheObject ret;
+		  	ret = new PermissionCacheObject();
+		  	ret.setStream("weather");
+			try {
+				// Generate input
+				String token=UUID.randomUUID().toString();
+				JsonNode so_data = buildJsonSoMetadataPublic(token);
+				JsonNode su_data = buildJsonSuMetadataPublic();
+				// Get initial provenance
+				ret = pdp.checkAuthorization(token, so_data, su_data, ret, PDP.operationID.DispatchData);
+				//ret = ServioticyProvenance.getInitialProvenance(so_data);
+				// Check the result of the policy evaluation
+				boolean pdpResult = ret.isPermission();
+				assertEquals(true, pdpResult);
+			} catch (PDPServioticyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				fail();
+			} catch (IOException e) {
+				fail();
+			}
+  
+			
+	 }
+
+	 @Test
+	 public  void defaultpolicyPublicNoStream() throws PDPServioticyException
+	 {
+		  	PermissionCacheObject ret;
 			try {
 				// Generate input
 				String token=UUID.randomUUID().toString();
@@ -99,10 +127,10 @@ public class TestDefaultPolicy
 	 }
 
 
-
 	 @Test
 	 public  void defaultpolicyPrivateOk() throws PDPServioticyException
 	 {
+		 	System.out.println("defaultpolicyPrivateOk");
 		  	PermissionCacheObject ret;
 			try {
 				// Generate input
@@ -114,6 +142,7 @@ public class TestDefaultPolicy
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
 				boolean pdpResult = ret.isPermission();
+				System.out.println("defaultpolicyPrivateOk--> End");
 				assertEquals(true, pdpResult);
 			} catch (PDPServioticyException e) {
 				// TODO Auto-generated catch block
@@ -158,14 +187,14 @@ public class TestDefaultPolicy
 	 {
 		  	PermissionCacheObject ret;
 			PermissionCacheObject inputCache = new PermissionCacheObject();
+			inputCache.setUserId("123");
 			try {
 				// Generate input
+				inputCache.setUserInfo(getUserInfo());
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPublic(token);
 				JsonNode su_data = buildJsonSuMetadataPublic();
-				Map tempCacheMap = new HashMap<String, Object>();
-				tempCacheMap.put("UserId", "123");
-				inputCache.setCache(tempCacheMap);				// Get initial provenance
+				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
@@ -183,19 +212,22 @@ public class TestDefaultPolicy
 	 }
 
 
-	 @Test
+
+
+	@Test
 	 public  void RetrieveServiceObjectDataCachePrivateOK() throws PDPServioticyException
 	 {
+			System.out.println("RetrieveServiceObjectDataCachePrivateOK");
 		  	PermissionCacheObject ret;
 			PermissionCacheObject inputCache = new PermissionCacheObject();
+			inputCache.setUserId("123");
 			try {
+				inputCache.setUserInfo(getUserInfo("123"));
 				// Generate input
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPrivate(token, "123");
 				JsonNode su_data = buildJsonSuMetadataPrivate("123");
-				Map tempCacheMap = new HashMap<String, Object>();
-				tempCacheMap.put("UserId", "123");
-				inputCache.setCache(tempCacheMap);				// Get initial provenance
+				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
@@ -217,14 +249,13 @@ public class TestDefaultPolicy
 	 {
 		  	PermissionCacheObject ret;
 			PermissionCacheObject inputCache = new PermissionCacheObject();
+			inputCache.setUserId("123");
 			try {
+				inputCache.setUserInfo(getUserInfo());
 				// Generate input
 				String token=UUID.randomUUID().toString();
 				JsonNode so_data = buildJsonSoMetadataPrivate(token, "123");
-				JsonNode su_data = buildJsonSuMetadataPrivate("123");
-				Map tempCacheMap = new HashMap<String, Object>();
-				tempCacheMap.put("UserId", "123False");
-				inputCache.setCache(tempCacheMap);	
+				JsonNode su_data = buildJsonSuMetadataPrivate("123");	
 				// Get initial provenance
 				ret = pdp.checkAuthorization(token, so_data, su_data, inputCache, PDP.operationID.RetrieveServiceObjectData);
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
@@ -278,7 +309,7 @@ public class TestDefaultPolicy
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadataPrivate(String token, String userid) throws JsonProcessingException, IOException {
-		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"123\"},\"flows\":[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}]}}"; 
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"13412341234123412341324\"},\"flows\":[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}]}}"; 
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
@@ -293,7 +324,7 @@ public class TestDefaultPolicy
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSuMetadataPrivate(String userid) throws JsonProcessingException, IOException {
-		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\",\"owner_id\":\""+ userid + "\", \"policy\" :[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}}";
+		     String string = "{\"security\" : {\"id\":\""+ userid + "\",\"owner_id\":\""+ userid + "\", \"policy\" :[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
@@ -309,7 +340,7 @@ public class TestDefaultPolicy
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadataPublic(String token) throws JsonProcessingException, IOException {
-		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"123\"},\"flows\":[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]}]}}";
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"owner_identifier123123\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"13412341234123412341324\"},\"flows\":[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]}]}}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
@@ -340,7 +371,7 @@ public class TestDefaultPolicy
 	  * @throws IOException
 	  */
 	 private JsonNode buildJsonSoMetadataPrivate2(String token, String userid) throws JsonProcessingException, IOException {
-		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"123\"},\"flows\":[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}]}}"; 
+		     String string = "{\"security\" : {\"id\":\"13412341234123412341324\", \"api_token\": \""+token+"\", \"owner_id\":\"" + userid + "\", \"policy\" :[{\"object\":{\"type\":\"so\",\"id\":\"13412341234123412341324\"},\"flows\":[{\"source\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"source\":{\"type\":\"any\",\"name\":\"{$src}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$src.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]},{\"target\":{\"type\":\"user\",\"id\":\"" + userid +"\"},\"locks\":[]},{\"target\":{\"type\":\"any\",\"name\":\"{$trg}\"},\"locks\":[{\"path\":\"locks/actsFor\",\"args\":[{\"type\":\"any\",\"id\":\"{$trg.id}\"},{\"type\":\"user\",\"id\":\"" + userid +"\"}]}]}]}]}}"; 
 		    ObjectMapper mapper = new ObjectMapper();
 		    JsonNode so_data;
 			so_data = mapper.readTree(string);
@@ -363,6 +394,33 @@ public class TestDefaultPolicy
 			return so_data;
 	}
 
+	 /**
+	  * 
+	  * @return UserInfo
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
+	 private JsonNode getUserInfo() throws JsonProcessingException, IOException {
+	    String string = "{\"id\":\"ade0456b-af8b-4348-b640-adfb51e9c02b\",\"username\":\"secServer02\",\"lastModified\":1433946242000,\"random_auth_token\":\"peV5vkhP4KrWSs84M7EjXdhzW0ylgqWfjIf5UM\",\"approvedMemberships\":[{\"id\":\"387cff5e-747f-4a1c-a43a-defcb7244fa6\",\"user_id\":\"ade0456b-af8b-4348-b640-adfb51e9c02b\",\"role\":\"ADMIN\",\"group_id\":\"41c06ee3-12d5-41d2-9317-398953219ac3\",\"group_name\":\"grouptest\",\"user_name\":\"secServer02\",\"lastModified\":1444313143000}]}"; 
+	    ObjectMapper mapper = new ObjectMapper();
+	    JsonNode so_data;
+		so_data = mapper.readTree(string);
+		return so_data;
+	}
+	 
+	 /**
+	  * 
+	  * @return UserInfo
+	  * @throws JsonProcessingException
+	  * @throws IOException
+	  */
+	 private JsonNode getUserInfo(String id) throws JsonProcessingException, IOException {
+	    String string = "{\"id\":\"" + id + "\",\"username\":\"secServer02\",\"lastModified\":1433946242000,\"random_auth_token\":\"peV5vkhP4KrWSs84M7EjXdhzW0ylgqWfjIf5UM\",\"approvedMemberships\":[{\"id\":\"387cff5e-747f-4a1c-a43a-defcb7244fa6\",\"user_id\":\"ade0456b-af8b-4348-b640-adfb51e9c02b\",\"role\":\"ADMIN\",\"group_id\":\"41c06ee3-12d5-41d2-9317-398953219ac3\",\"group_name\":\"grouptest\",\"user_name\":\"secServer02\",\"lastModified\":1444313143000}]}"; 
+	    ObjectMapper mapper = new ObjectMapper();
+	    JsonNode so_data;
+		so_data = mapper.readTree(string);
+		return so_data;
+	}
 
 
 }

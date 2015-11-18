@@ -13,25 +13,37 @@ import java.lang.String;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.UserDataHandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IDMCommunicator;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IdentityVerifier;
+import de.passau.uni.sec.compose.pdp.servioticy.policy.PolicyEvaluation;
 
 public class AuthorizationServioticy 
 {
 	private static final String IDM_USER_SECTION = "id";
+	private PolicyEvaluation pdp;
 
+	
+	/**
+	 * Constructor
+	 */
+	public AuthorizationServioticy(PolicyEvaluation p){
+		pdp = p;
+	}
+	
 	
 	
 	/**
-	 * Verifies the policy for the currnt SO and a SU
+	 * Verifies the policy for the current SO and a SU
 	 *
 	 * @param security_metadata_SO_current
 	 * @param security_metadata_of_the_SU
@@ -40,7 +52,7 @@ public class AuthorizationServioticy
 	 * @param idmUser
 	 * @param idmPass
 	 * @param idmPort
-	 * @return returns true or false in the "Permission" entry of the cach object depending on the policy evaluation
+	 * @return returns true or false in the "Permission" entry of the cache object depending on the policy evaluation
 	 */
 	public PermissionCacheObject verifyGetData( String access_token_user ,
 			JsonNode security_metadata_SO_current,
@@ -48,73 +60,48 @@ public class AuthorizationServioticy
 			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
 		
 		Map<String, Object> internalCache = new HashMap<String, Object>();
+		JsonNode userInfo;
+		String userId;
 
 		// Check if parameters to connect to IDM exist
-	 	 if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0) {
+	 	 if(idmUser==null || idmPass == null || idmHost == null || idmPort<0) {
 	 		throw new PDPServioticyException(500, "Not enough parameters to talk to the IDM ", "Not enough parameters to talk to IDM");
 		 }
 		 if(security_metadata_of_the_SU ==null || security_metadata_SO_current ==null)
 				throw new PDPServioticyException(500, "No security metadata for the sensor update or service object", "Not enough security metadata for the sensor update or service object");
-		 // Connect to IDM if no information is in the cach objecttempMapCache
+		 // Connect to IDM if no information is in the cache objecttempMapCache
 		 String response = "";
-		 if (cache ==null || cache.getCache() == null) {	
-			 if(cache==null)
-				 cache = new PermissionCacheObject();
-		 	 // Check if user is allowed to get data from the SO
-			 if(cache.getCache()!=null)
-				 internalCache = (Map<String, Object>) cache.getCache();
-			
-			 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
-			 try {
-				 response = com.getInformationForUser(access_token_user);
-				 if(response ==null)
-				 {
-					 internalCache.put("wrong:"+access_token_user, new Boolean(true));
-					 cache.setCache(internalCache);
-					 cache.setPermission(false);
-					 return cache;
-				 }
-				 internalCache.put("wrong:"+access_token_user, new Boolean(false));
+		 if (cache == null || cache.getCache() == null || cache.getUserId() == null || cache.getUserInfo() == null) {	
+			 userInfo =  getUserInfoIDM(idmUser, idmPass, idmHost, idmPort, access_token_user);
+			 if (userInfo == null){
+			 		throw new PDPServioticyException(500, "Could not get User info from IDM ", "Could not get User info from IDM");
 			 }
-			 catch (PDPServioticyException e){
-				 cache.setPermission(false);
-				 cache.setCache(e);
-				 return cache;
-			 }
-			
-			// Parse response
-		    ObjectMapper mapperUser = new ObjectMapper();
-		    JsonNode user_data = null;
-			try {
-				user_data = mapperUser.readTree(response);
-			} catch (JsonProcessingException e1) {
-				user_data = null;
-			} catch (IOException e1) {
-				user_data = null;
-			}
-			JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
-			if (userSO != null){
-				internalCache.put("UserId", userSO.asText());
-			}
-			cache.setCache(internalCache);
+			 userId = userInfo.findValue(IDM_USER_SECTION).toString();
+			 cache.setUserInfo(userInfo);
+			 cache.setUserId(userId);
 		 }
 		 else{
-			 internalCache=(Map<String, Object>) cache.getCache();
-
+			 userInfo = cache.getUserInfo();
+			 userId = cache.getUserId();
 		 }
-		 if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
+		 // TODO wrong access token handling see below
+		 /*if(internalCache.containsKey("wrong:"+access_token_user)&&((Boolean)internalCache.get("wrong:"+access_token_user)).booleanValue())
 		 {
 			 cache.setPermission(false);
 			 cache.setCache(internalCache);
 			 return cache;
-		 }
-		 JsonNode owner = security_metadata_SO_current.findValue("owner_id");
+		 }*/
+		 //TODO check if owner/SO can be removed
+		 /*JsonNode owner = security_metadata_SO_current.findValue("owner_id");
 		 if(owner==null)
 		 {
 			 throw new PDPServioticyException(500, "owner not found in service object metadata", "owner_id not found inside security metadata for service object:"+security_metadata_of_the_SU);
 		 }
-		 String soOwner = owner.asText();
-		 boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId());
+		 String soOwner = owner.asText();*/
+		 //boolean poleval = evaluatePolicy(security_metadata_of_the_SU, cache.getUserId()); // Dummy
+		 
+		 
+		 boolean poleval = pdp.checkAccess(security_metadata_of_the_SU, cache.getUserId(), userInfo);
 		 cache.setPermission(poleval);
 		 cache.setCache(internalCache);
 		
@@ -130,13 +117,18 @@ public class AuthorizationServioticy
 	 * @param idmUser)&&
 	 * @param idmPass
 	 * @param idmPort
-	 * @return returns true or false in the "Permission" entry of the cach object depending on the policy evaluation
+	 * @return returns true or false in the "Permission" entry of the cache object depending on the policy evaluation
 	 */
 	public PermissionCacheObject verifyGetDataDispatch(
 			JsonNode security_metadata_SO_destination,
 			JsonNode security_metadata_of_the_SU,
-			String idmHost, String idmUser, String idmPass,int idmPort) throws PDPServioticyException {
+			String idmHost, String idmUser, String idmPass,int idmPort, PermissionCacheObject cache) throws PDPServioticyException {
 
+			String stream = null;
+			if (cache != null){
+				stream = cache.getStream();
+			}
+		
 	 		PermissionCacheObject obj = new PermissionCacheObject();
  			if (security_metadata_SO_destination == null || security_metadata_of_the_SU == null)
  			{
@@ -148,8 +140,9 @@ public class AuthorizationServioticy
 			// Add check if it is the same SO if yes return true. 
 			// http://docs.servioticysecurity.apiary.io/
 
-			boolean evaluation = evaluatePolicy(security_metadata_SO_destination, security_metadata_of_the_SU);
-			obj.setPermission(evaluation);
+			//boolean evaluation = evaluatePolicy(security_metadata_SO_destination, security_metadata_of_the_SU); // Dummy
+ 			boolean evaluation = pdp.checkFlow(security_metadata_SO_destination, security_metadata_of_the_SU, stream);
+ 			obj.setPermission(evaluation);
 	    	// Build Security Meta-Data
 			Map<String, Object> tempMapCache = new HashMap<String, Object>();
 	    	ObjectMapper mapper = new ObjectMapper();
@@ -273,24 +266,68 @@ public class AuthorizationServioticy
 		return checkOwner(SO,accessToken,idmHost, idmUser,idmPass, idmPort);
 	}
 
-	
+	/*
+	 * Checks read access
+	 */
 	public PermissionCacheObject genericPublicPrivatePolicy(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
 	{
 		PermissionCacheObject ret = new PermissionCacheObject();
 		ret.setPermission(false);
 		IdentityVerifier idm = new IdentityVerifier();
 		Map<String, Object> tempMapCache = new HashMap<String, Object>();
-		String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
-		tempMapCache.put("UserId", userId);
-		if(userId!=null)
-		{
-		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SO,userId));
+		//String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
+		JsonNode userInfo;
+		String userId;
+		try {
+			userInfo = getUserInfoIDM(idmUser, idmPass, idmHost, idmPort, accessToken);
+			userId = userInfo.findValue(IDM_USER_SECTION).toString();
+		} catch (PDPServioticyException e) {
+			userInfo = null;
+			ret.setPermission(false);
+			return ret;
 		}
-		ret.setCache(tempMapCache);
+
+		if(userId != null && userInfo != null)
+		{
+		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SO,userId, userInfo));
+		   ret.setUserInfo(userInfo);
+		   ret.setUserId(userId);
+		}
 		return ret;
-		
 	}
 
+	
+	/*
+	 * Checks write access
+	 */
+	public PermissionCacheObject genericPublicPrivatePolicyWrite(JsonNode SO, String accessToken,String idmHost, String idmUser, String idmPass,int idmPort)
+	{
+		PermissionCacheObject ret = new PermissionCacheObject();
+		ret.setPermission(false);
+		IdentityVerifier idm = new IdentityVerifier();
+		Map<String, Object> tempMapCache = new HashMap<String, Object>();
+		//String userId = idm.userIdFromToken(accessToken,idmHost, idmUser,idmPass, idmPort);
+		JsonNode userInfo;
+		String userId;
+		try {
+			userInfo = getUserInfoIDM(idmUser, idmPass, idmHost, idmPort, accessToken);
+			userId = userInfo.findValue(IDM_USER_SECTION).toString();
+		} catch (PDPServioticyException e) {
+			userInfo = null;
+			ret.setPermission(false);
+			return ret;
+		}
+
+		if(userId != null && userInfo != null)
+		{
+		   ret.setPermission(evaluatePolicyGenericPublicPrivateWrite(SO,userId, userInfo));
+		   ret.setUserInfo(userInfo);
+		   ret.setUserId(userId);
+		}
+		return ret;
+	}
+	
+	
 	public PermissionCacheObject genericPublicPrivatePolicyNoIDM(JsonNode SU, PermissionCacheObject cache)
 	{
 		PermissionCacheObject ret = new PermissionCacheObject();
@@ -298,10 +335,11 @@ public class AuthorizationServioticy
 		// Get user id
 		String userId = "";
 		userId = cache.getUserId();
+		JsonNode userInfo = cache.getUserInfo();
 		// Evaluate policy
-		if(userId!=null)
+		if(userId!=null && userInfo != null)
 		{
-		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SU,userId));
+		   ret.setPermission(evaluatePolicyGenericPublicPrivate(SU,userId, userInfo));
 		}
 		return ret;
 	}
@@ -336,9 +374,37 @@ public class AuthorizationServioticy
 	 * @param userId security_metadata_of_the_SU (input SU)
 	 * @return returns true or false depending on the policy evaluation
 	 */
-	private boolean evaluatePolicyGenericPublicPrivate(JsonNode SO, String userId)
+	private boolean evaluatePolicyGenericPublicPrivate(JsonNode SO, String userId, JsonNode userInfo)
 	{
-		return evaluatePolicy(SO, userId);
+		//return evaluatePolicy(SO, userId); // Dummy
+		return pdp.checkAccess(SO, userId, userInfo);
+				
+	}
+	
+	/**
+	 * Checks if the private/public policy holds...
+	 * @param SO security_metadata_SO (destination SO)
+	 * @param userId security_metadata_of_the_SU (input SU)
+	 * @return returns true or false depending on the policy evaluation
+	 */
+	private boolean evaluatePolicyGenericPublicPrivateWrite(JsonNode SO, String userId, JsonNode userInfo)
+	{
+		//return evaluatePolicy(SO, userId); // Dummy
+		return pdp.checkWriteAccess(SO, userId, userInfo, null);
+				
+	}
+	
+	/**
+	 * Checks if the private/public policy holds...
+	 * @param SO security_metadata_SO (destination SO)
+	 * @param userId security_metadata_of_the_SU (input SU)
+	 * @return returns true or false depending on the policy evaluation
+	 */
+	private boolean evaluatePolicyGenericPublicPrivateWrite(JsonNode SO, String userId, JsonNode userInfo, String stream)
+	{
+		//return evaluatePolicy(SO, userId); // Dummy
+		return pdp.checkWriteAccess(SO, userId, userInfo, stream);
+				
 	}
 	
 	/**
@@ -348,7 +414,7 @@ public class AuthorizationServioticy
 	 * @param security_metadata_of_the_SU (input SU)
 	 * @return returns true or false depending on the policy evaluation
 	 */
-	private boolean evaluatePolicy(JsonNode SO, JsonNode inputSU){
+	private boolean evaluatePolicyDummy(JsonNode SO, JsonNode inputSU){
 		boolean ret = false;
 		// Get userids
 		JsonNode userSO = SO.findValue("owner_id");
@@ -421,7 +487,7 @@ public class AuthorizationServioticy
 	 * @param user that wants to access the SU
 	 * @return returns true or false depending on the policy evaluation
 	 */
-	private boolean evaluatePolicy(JsonNode SU, String user){
+	private boolean evaluatePolicyDummy(JsonNode SU, String user){
 		boolean ret = false;
 		// Get policys (works if it is inside the security section or if it is at the highest level)
 		JsonNode policySU = SU.findValue("policy");
@@ -521,17 +587,72 @@ public class AuthorizationServioticy
 	 * @param stream
 	 */
 	public boolean evaluatePolicy(EncodedUser user, JsonNode security_metadata_SO_current,
-			String stream) throws PDPServioticyException{
-		
-		if(user.getId().equals("-1")) // for testing purposes...
+		String stream) throws PDPServioticyException{
+		boolean ret = false;
+		String jsonUser = "";
+		// EncodedUser to JsonNode
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		try {
+			jsonUser = ow.writeValueAsString(user);
+		} catch (JsonProcessingException e) {
+			System.out.println("PDP Error during parsing of the EncodedUser: " + e);
 			return false;
-		return true;
-		
-
+		}
+		System.out.println("JSON of encoded user: " + jsonUser);
+	    ObjectMapper mapper = new ObjectMapper();
+	    JsonNode user_data = null;
+	    try {
+			user_data = mapper.readTree(jsonUser);
+		} catch (JsonProcessingException e) {
+			System.out.println("PDP Error during parsing of the EncodedUser to JsonNode: " + e);
+			return false;
+		} catch (IOException e) {
+			System.out.println("PDP Error during parsing of the EncodedUser to JsonNode: " + e);
+			return false;
+		}
+	    
+		ret = pdp.checkWriteAccess(security_metadata_SO_current, user.getId(), user_data, stream);
+		return ret;
 	}
 
-
-
+	/*
+	 * Get IDM info with token
+	 */
+	private JsonNode getUserInfoIDM(String idmUser, String idmPass, String idmHost, int idmPort, String access_token_user) throws PDPServioticyException{
+		JsonNode ret = null;
+		if(idmUser==null || idmPass == null || idmHost ==null || idmPort<0) {
+	 		throw new PDPServioticyException(500, "Not enough parameters to talk to the IDM ", "Not enough parameters to talk to IDM");
+		 }
+		 // Connect to IDM if no information is in the cache objecttempMapCache
+		 String response = "";
+	 	 // Check if user is allowed to get data from the SO
+		 IDMCommunicator com = new IDMCommunicator(idmUser, idmPass, idmHost, idmPort);
+		 try {
+			 response = com.getInformationForUser(access_token_user);
+			 if(response ==null){
+				 //internalCache.put("wrong:"+access_token_user, new Boolean(true));
+				 return null;
+			 }
+			 //internalCache.put("wrong:"+access_token_user, new Boolean(false));
+		 }
+		 catch (PDPServioticyException e){
+			 return null;
+		 }
+		
+		// Parse response
+	    ObjectMapper mapperUser = new ObjectMapper();
+	    JsonNode user_data = null;
+		try {
+			user_data = mapperUser.readTree(response);
+		} catch (JsonProcessingException e1) {
+			user_data = null;
+		} catch (IOException e1) {
+			user_data = null;
+		}
+		ret = user_data;
+		//JsonNode userSO = user_data.findValue(IDM_USER_SECTION);
+		return ret;
+	}
 }
 
 

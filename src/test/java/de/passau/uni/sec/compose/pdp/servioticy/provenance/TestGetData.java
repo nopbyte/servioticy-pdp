@@ -35,7 +35,7 @@ public class TestGetData
 		 pdp = new LocalPDP();
 		 pdp.setIdmUser("component");
 		 pdp.setIdmPort(8080);
-		 pdp.setIdmPassword("ZXJpZHMiLCJ");
+		 pdp.setIdmPassword("dummyTest");
 		 pdp.setIdmHost("132.231.11.217");
 		 soid = "123123";
 		 streamid="stream";

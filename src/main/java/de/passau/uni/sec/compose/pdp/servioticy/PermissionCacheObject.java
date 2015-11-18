@@ -34,6 +34,19 @@ public class PermissionCacheObject
 		}
 		return ret;
 	}
+	
+	public JsonNode getUserInfo()
+	{
+		JsonNode ret = null;
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("userInfo"))
+				ret = (JsonNode) temp.get("userInfo");
+		}
+		return ret;
+	}
+	
 	public JsonNode getSecurityMetaData()
 	{
 		JsonNode ret = null;
@@ -69,7 +82,19 @@ public class PermissionCacheObject
 			this.setCache(tempMapCache);
 		}
 	}
-
+	
+	public String getStream()
+	{
+		String ret = null;
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			Map temp = (Map<String, Object>)this.cache;
+			if(temp.containsKey("Stream"))
+				ret = (String) temp.get("Stream");
+		}
+		return ret;
+	}
+	
 	public void setSubscriptionInfo(String subInfo)
 	{
 		if(this.cache != null && this.cache instanceof Map)
@@ -117,6 +142,16 @@ public class PermissionCacheObject
 				ret = (JsonNode) temp.get("decryptedUpdate");
 		}
 		return ret;
+	}
+	public void setUserInfo(JsonNode userInfo) {
+		if(this.cache != null && this.cache instanceof Map)
+		{
+			((Map<String, Object>)this.cache).put("userInfo", userInfo);
+		} else {
+			Map<String, Object> tempMapCache = new HashMap<String, Object>();
+			tempMapCache.put("userInfo", userInfo);
+			this.setCache(tempMapCache);
+		}		
 	}
 	
 }

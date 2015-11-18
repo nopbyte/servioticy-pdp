@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.passau.uni.sec.compose.pdp.servioticy.authz.AuthorizationServioticy;
 import de.passau.uni.sec.compose.pdp.servioticy.exception.PDPServioticyException;
 import de.passau.uni.sec.compose.pdp.servioticy.idm.IdentityVerifier;
+import de.passau.uni.sec.compose.pdp.servioticy.policy.PolicyEvaluation;
 import de.passau.uni.sec.compose.pdp.servioticy.provenance.ServioticyProvenance;
 
 public class LocalPDP implements PDP
@@ -41,10 +42,13 @@ public class LocalPDP implements PDP
 	
 	private String apiUrl;
 	
+	private PolicyEvaluation pdp;
+	
 	public LocalPDP()
 	{
-		id = new IdentityVerifier();
-		 authz = new AuthorizationServioticy();
+		 pdp = new PolicyEvaluation();
+		 id = new IdentityVerifier();
+		 authz = new AuthorizationServioticy(pdp);
 		 mapper = new ObjectMapper();
 	}
 	
@@ -64,7 +68,7 @@ public class LocalPDP implements PDP
 		else if (opId.equals(PDP.operationID.DispatchData)) 
 		{
 		    // Check policy
-		    return authz.verifyGetDataDispatch(security_metadata_SO_current, security_metadata_of_the_SU,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+		    return authz.verifyGetDataDispatch(security_metadata_SO_current, security_metadata_of_the_SU,this.idmHost, this.idmUser,this.idmPassword, idmPort, cache);
 		}
 		else if (opId.equals(PDP.operationID.DeleteSensorUpdateData)) 
 		{
@@ -111,7 +115,7 @@ public class LocalPDP implements PDP
 		else if(opId.equals(PDP.operationID.GetActuationStatus))
 			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.LaunchActuation)) // this one is only getting so because we do policies on the SO only, not in streams or actuators
-			return authz.genericPublicPrivatePolicy(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
+			return authz.genericPublicPrivatePolicyWrite(security_metadata_SO_current, token,this.idmHost, this.idmUser,this.idmPassword, idmPort);
 		else if(opId.equals(PDP.operationID.UpdateActuation))
 			return updateActuationStatus(token, security_metadata_SO_current);
 		else {
