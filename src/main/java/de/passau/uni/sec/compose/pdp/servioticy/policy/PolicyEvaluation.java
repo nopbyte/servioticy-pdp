@@ -25,7 +25,7 @@ public class PolicyEvaluation {
 	    error = false;
 	    
 	    // Load files
-	    File polFolder = new File("./src/main/js/de/passau/uni/sec/compose/Policy/");
+	    File polFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/");
 	    File[] polFiles = polFolder.listFiles();
 	    for (File i : polFiles){
 	    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js") && (i.getName().toLowerCase().endsWith("postloadinit.js") == false)){
@@ -41,7 +41,7 @@ public class PolicyEvaluation {
 	    	}
 	    }
 	    // Load logs
-	    File locFolder = new File("./src/main/js/de/passau/uni/sec/compose/Policy/Locks/");
+	    File locFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/Locks/");
 	    File[] locFiles = locFolder.listFiles();
 	    for (File i : locFiles){
 	    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js")){
@@ -57,7 +57,7 @@ public class PolicyEvaluation {
 	    	}
 	    }
 	    // Register logs
-	    File testFile = new File("./src/main/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
+	    File testFile = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
 	    Reader testReader;
 		try {
 			testReader = new FileReader(testFile);
