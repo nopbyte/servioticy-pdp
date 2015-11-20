@@ -377,7 +377,7 @@ public class AuthorizationServioticy
 	private boolean evaluatePolicyGenericPublicPrivate(JsonNode SO, String userId, JsonNode userInfo)
 	{
 		//return evaluatePolicy(SO, userId); // Dummy
-		return pdp.checkAccess(SO, userId, userInfo);
+		return pdp.checkAccessSO(SO, userId, userInfo);
 				
 	}
 	

@@ -66,8 +66,6 @@ public class PolicyEvaluation {
 
 
 
-
-
 	/*
 	 * Constructor, loads the main files and all locks (including the registration of the logs)
 	 */
@@ -327,6 +325,77 @@ public class PolicyEvaluation {
 		return ret;
 	}
 
+	
+	
+	/*
+	 * Checks the policy of SO against a user // TODO change for SO
+	 */
+	public boolean checkAccessSO(JsonNode SO, String user, JsonNode userInfo){
+		boolean ret = false;
+		System.out.println("Check access with init-error:" + error);
+		String code = "";
+		// Get policys (works if it is inside the security section or if it is at the highest level)
+		JsonNode policySO = SO.findValue("policy");
+		// If no policy section is found return false
+		if (policySO == null)
+		{
+			System.out.println("DPD-JS: no Policy found");
+			return false;
+		}
+
+		JsonNode secSO = SO.findValue("security");
+		if (secSO == null){
+			secSO = SO;
+		}
+		
+		// Build entity
+		JsonNode idSO = secSO.get("id");
+		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
+		String entitySO = "{\"type\" : \"so\", \"id\":" + idSO + "}";
+		System.out.println("EntitiySO: " + entitySO);
+		System.out.println("SO sec: " + secSO.toString());
+		//System.out.println("User: " + userInfo.toString());
+
+		// context.subsject = {IDM result} contect.object = SU.security
+
+
+
+		// Generate analysis code
+		code += "cont = new Context({subject : {type : 'user', data:" + userInfo.toString() + "},object : {type : 'so',data:" + secSO.toString() + "}});";
+		//code += "cont = {subject : " + userInfo.toString() + ",object : " + secSU.toString() + "};";
+		code += "print(\"\\n\");";
+		code += "print(\"cont \"+JSON.stringify(cont));";
+		code += "print(\"\\n\");";
+		code += "entDes = new Entity(" + entitySO + ");";
+		code += "print(\"\\n3\");";
+		code += "pSet = new PolicySet(" + policySO.toString() +");";
+		code += "print(\"\\n\");";
+		code += "pSO = pSet.getBestMatchPolicy(entDes);";
+		//code += "pSO = new Policy(pSO.flows)";
+		//code += "pSO = new Policy(" + policySO.get("flows").toString()+");";
+		code += "entDes = new Entity(" + entity + ");";
+		code += "print(\"pSO \"+JSON.stringify(pSO));";
+		code += "print(\"\\n\");";
+		code += "ret = pSO.checkAccess(entDes, Policy.Operation.READ, cont);";
+		code += "print(\"ret check Access\"+JSON.stringify(ret));";
+		code += "ret = ret.result";
+		// Evaluate code
+	    try {
+			engine.eval(code);
+			Object retJS = engine.get("ret");
+			System.out.println("\nRET in Java: " + retJS);
+			if (retJS instanceof Boolean){
+				ret = (Boolean) retJS;
+			} else {ret = false;};
+	    } catch (ScriptException e) {
+			System.out.println("PDP-JS: " + e);
+			ret = false;
+		}
+		return ret;
+	}
+	
+	
+	
 	/*
 	 * Checks the policy of SU against a user
 	 */
