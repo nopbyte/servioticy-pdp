@@ -8,7 +8,15 @@ import java.io.Reader;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
+import java.security.CodeSource;
+import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import de.passau.uni.sec.compose.pdp.servioticy.PermissionCacheObject;
@@ -18,56 +26,193 @@ public class PolicyEvaluation {
 	private boolean error;
     private ScriptEngineManager manager = new ScriptEngineManager();
     private ScriptEngine engine = manager.getEngineByName("JavaScript");
+
+
+
+	private static String getStringFromInputStream(InputStream is) {
+
+		if (is == null){
+			System.out.println("Empty inout stream");
+			return "";
+		}
+
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+
+		String line;
+		try {
+
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((line = br.readLine()) != null) {
+				sb.append("\n" + line);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return sb.toString();
+
+	}
+
+
+
+
+
+
 	/*
 	 * Constructor, loads the main files and all locks (including the registration of the logs)
 	 */
 	public PolicyEvaluation() {
-	    error = false;
-	    
-	    // Load files
-	    File polFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/");
-	    File[] polFiles = polFolder.listFiles();
-	    for (File i : polFiles){
-	    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js") && (i.getName().toLowerCase().endsWith("postloadinit.js") == false)){
-	    		System.out.println(i);
-	    		Reader poReaderTemp;
-				try {
-					poReaderTemp = new FileReader(i);
-		    		engine.eval(poReaderTemp);
-				} catch (Exception e) {
-					System.out.println("PDP-JS: " + e);
-					error = true;
-				}
-	    	}
-	    }
-	    // Load logs
-	    File locFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/Locks/");
-	    File[] locFiles = locFolder.listFiles();
-	    for (File i : locFiles){
-	    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js")){
-	    		System.out.println(i);
-	    		Reader poReaderTemp;
-				try {
-					poReaderTemp = new FileReader(i);
-		    		engine.eval(poReaderTemp);
-				} catch (Exception e) {
-					System.out.println("PDP-JS: " + e);
-					error = true;
-				}
-	    	}
-	    }
-	    // Register logs
-	    File testFile = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
-	    Reader testReader;
+		Boolean inJar = false;
+	  error = false;
+		String currentJsCode = "";
+
 		try {
-			testReader = new FileReader(testFile);
-		    engine.eval(testReader);
-		} catch (Exception e) {
-			System.out.println("PDP-JS: " + e);
-			error = true;
+			CodeSource src = PolicyEvaluation.class.getProtectionDomain().getCodeSource();
+			if (src != null) {
+				URL jar = src.getLocation();
+				ZipInputStream zip = null;
+				zip = new ZipInputStream(jar.openStream());
+				while(true) {
+					ZipEntry e = null;
+					e = zip.getNextEntry();
+					if (e == null)
+						break;
+					inJar = true;
+					String name = e.getName();
+	    			if (name.startsWith("js/de/passau/uni/sec/compose/Policy/") && name.endsWith(".js") && name.startsWith("js/de/passau/uni/sec/compose/Policy/Locks/") == false && name.contains("postLoadInit") == false) {
+	    				System.out.println("jar " + name);
+	    				ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+	        		   InputStream resource = PolicyEvaluation.class.getResourceAsStream("/"+ name);
+	        		   currentJsCode = getStringFromInputStream(resource);
+	        		   //System.out.println("Data: " + currentJsCode);
+	        		   try {
+	        			   engine.eval(currentJsCode);
+	        		   } catch (Exception eJS) {
+	        			   System.out.println("PDP-JS: " + eJS);
+	        			   error = true;
+	        		   }
+	    			}
+				}
+			}
+			else {
+				   System.out.println("PDP-JS could not get the list of files");
+    			   error = true;
+			}
+		} catch (Exception e2) {
+			   System.out.println("PDP-JS could not get the list of files: " + e2);
+			   error = true;
+		}
+		if (inJar == true){
+			// Locks
+			try {
+				CodeSource src = PolicyEvaluation.class.getProtectionDomain().getCodeSource();
+				if (src != null) {
+					URL jar = src.getLocation();
+					ZipInputStream zip = null;
+					zip = new ZipInputStream(jar.openStream());
+					while(true) {
+						ZipEntry e = null;
+						e = zip.getNextEntry();
+						if (e == null)
+							break;
+						String name = e.getName();
+		    			if (name.startsWith("js/de/passau/uni/sec/compose/Policy/Locks/") && name.endsWith(".js")) {
+		    				System.out.println("jar " + name);
+		    				ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		        		   InputStream resource = PolicyEvaluation.class.getResourceAsStream("/"+ name);//"/js/de/passau/uni/sec/compose/Policy/Flow.js");
+		        		   currentJsCode = getStringFromInputStream(resource);
+		        		   //System.out.println("Data: " + currentJsCode);
+		        		   try {
+		        			   engine.eval(currentJsCode);
+		        		   } catch (Exception eJS) {
+		        			   System.out.println("PDP-JS: " + eJS);
+		        			   error = true;
+		        		   }
+		    			}
+					}
+				}
+				else {
+					   System.out.println("PDP-JS could not get the list of files");
+	    			   error = true;
+				}
+			} catch (Exception e2) {
+				   System.out.println("PDP-JS could not get the list of files: " + e2);
+				   error = true;
+			}
+			// Post load init
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+					System.out.println("jar /js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
+			   InputStream resource = PolicyEvaluation.class.getResourceAsStream("/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
+			   currentJsCode = getStringFromInputStream(resource);
+			   try {
+				   engine.eval(currentJsCode);
+			   } catch (Exception eJS) {
+				   System.out.println("PDP-JS: " + eJS);
+				   error = true;
+			   }
+			 }
+
+			 if (inJar == false){
+				 // Load files local
+		    try{
+		    // Load files
+		    File polFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/");
+		    File[] polFiles = polFolder.listFiles();
+		    for (File i : polFiles){
+		    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js") && (i.getName().toLowerCase().endsWith("postloadinit.js") == false)){
+		    		System.out.println(i);
+		    		Reader poReaderTemp;
+					try {
+						poReaderTemp = new FileReader(i);
+			    		engine.eval(poReaderTemp);
+					} catch (Exception e) {
+						System.out.println("PDP-JS: " + e);
+						error = true;
+					}
+		    	}
+		    }
+		    // Load logs
+		    File locFolder = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/Locks/");
+		    File[] locFiles = locFolder.listFiles();
+		    for (File i : locFiles){
+		    	if (i.isFile() && i.getName().toLowerCase().endsWith(".js")){
+		    		System.out.println(i);
+		    		Reader poReaderTemp;
+					try {
+						poReaderTemp = new FileReader(i);
+			    		engine.eval(poReaderTemp);
+					} catch (Exception e) {
+						System.out.println("PDP-JS: " + e);
+						error = true;
+					}
+		    	}
+		    }
+		    // Register logs
+		    File testFile = new File("src/main/resources/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
+		    Reader testReader;
+			try {
+				testReader = new FileReader(testFile);
+			    engine.eval(testReader);
+			} catch (Exception e) {
+				System.out.println("PDP-JS: " + e);
+				error = true;
+			}
+		}catch (Exception e2){
+			System.out.println("PDP-JS: " + e2);
 		}
 	}
-	
+}
+
 	/*
 	 * Checks the policy of SO and a SU (SU that is processed by a SO)
 	 */
@@ -93,12 +238,12 @@ public class PolicyEvaluation {
 		if (secSU == null){
 			secSU = inputSU;
 		}
-		JsonNode idSO = secSO.get("id");		
+		JsonNode idSO = secSO.get("id");
 		String entity = "{\"type\" : \"so\", \"id\":\"" + idSO.asText() + "\",\"stream\": \""+ stream + "\"}";
 		System.out.println("Entitiy: " + entity);
 		System.out.println("context: " + "{subject : {type : 'so', data:" + secSO.toString() + "},object : {type : 'su',data:" + secSU.toString() + "}};");
-		
-		
+
+
 		// Generate analysis code
 		code += "cont = new Context({subject : {type : 'so', data:" + secSO.toString() + "},object : {type :'su',data :" + secSU.toString() + "}});";
 		//code += "cont = {subject : " + secSO.toString() + ",object : " + secSU.toString() + "};"; // context.subject = SO.Security context.object = SU.security
@@ -145,7 +290,7 @@ public class PolicyEvaluation {
 			return false;
 		}
 
-		// Build entity	
+		// Build entity
 		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
 		System.out.println("Entitiy: " + entity);
 		// context.subsject = {IDM result} contect.object = SU.security
@@ -153,8 +298,8 @@ public class PolicyEvaluation {
 		if (secSU == null){
 			secSU = SU;
 		}
-		
-		
+
+
 		// Generate analysis code
 		code += "cont = new Context({subject : {type : 'user', data:" + userInfo.toString() + "},object : {type : 'su',data:" + secSU.toString() + "}});";
 		//code += "cont = {subject : " + userInfo.toString() + ",object : " + secSU.toString() + "};";
@@ -181,7 +326,7 @@ public class PolicyEvaluation {
 		}
 		return ret;
 	}
-	
+
 	/*
 	 * Checks the policy of SU against a user
 	 */
@@ -198,7 +343,7 @@ public class PolicyEvaluation {
 			return false;
 		}
 
-		// Build entity	
+		// Build entity
 		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
 		System.out.println("Entitiy: " + entity);
 		// context.subsject = {IDM result} contect.object = SU.security
@@ -206,8 +351,8 @@ public class PolicyEvaluation {
 		if (secSU == null){
 			secSU = SU;
 		}
-		
-		
+
+
 		// Generate analysis code
 		code += "cont = new Context({subject : {type : 'user', data:" + userInfo.toString() + "},object : {type : 'su',data:" + secSU.toString() + "}});";
 		//code += "cont = {subject : " + userInfo.toString() + ",object : " + secSU.toString() + "};";
@@ -234,7 +379,7 @@ public class PolicyEvaluation {
 		}
 		return ret;
 	}
-	
+
 	/*
 	 * Checks the policy of SO against a user WTP
 	 */
@@ -250,14 +395,14 @@ public class PolicyEvaluation {
 			System.out.println("DPD-JS: no Policy found");
 			return false;
 		}
-		
+
 		JsonNode secSO = SO.findValue("security");
 		if (secSO == null){
 			secSO = SO;
 		}
-		
 
-		// Build entity	
+
+		// Build entity
 		JsonNode idSO = secSO.get("id");
 		String entitySO;
 		if (stream != null && stream != ""){
@@ -270,11 +415,11 @@ public class PolicyEvaluation {
 
 		System.out.println("Entitiy: " + entitySO);
 		// context.subsject = {IDM result} contect.object = SU.security
-		
+
 		// Generate analysis code
 		code += "cont = new Context({subject : {type : 'user', data:" + userInfo.toString() + "},object : {type : 'so',data:" + secSO.toString() + "}});";
 		code += "entDes = new Entity(" + entitySO + ");";
-		
+
 		code += "pSet = new PolicySet(" + policySO.toString() +");";
 		//code += "print(\"PolicySet \"+JSON.stringify(pSet));";
 		code += "pSO = pSet.getBestMatchPolicy(entDes);";
@@ -301,10 +446,3 @@ public class PolicyEvaluation {
 		return ret;
 	}
 }
-
-
-
-
-
-
-
