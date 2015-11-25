@@ -21,6 +21,8 @@ if(global && typeof print !== "function") {
     var Entity = require(PolicyConfig.rootDir + "./Entity.js");
 }
 
+var lockConstructors = {};
+
 // ## Constructor
 var Lock = function(lock) {
 
@@ -28,12 +30,12 @@ var Lock = function(lock) {
        throw new Error("Error: Lock: Can't instantiate an abstract class!");
        } */
 
-    /* if(!Lock.lockConstructors) {
+    /* if(!lockConstructors == {}) {
         Lock.initLocks();
     }*/
 
     if(this.constructor === Object &&
-       lock && lock.path && Lock.lockConstructors[lock.path]) {
+       lock && lock.path && lockConstructors[lock.path]) {
         throw new Error("Lock: Use Lock.createLock to generate Locks of type '"+lock.path+"'");
     } else {
         if(lock === undefined) {
@@ -67,7 +69,7 @@ var Lock = function(lock) {
 
 // ## Static Methods
 Lock.createLock = function(lock) {
-    if(!Lock.lockConstructors || !Lock.lockConstructors[lock]) {
+    if(!lockConstructors[lock.path]) {
         Lock.initLocks();
     }
     
@@ -84,34 +86,34 @@ Lock.createLock = function(lock) {
         lock = { path : "actsFor", args : [ lock.args[1].id ] };
     }
     
-    if(!Lock.lockConstructors[lock.path]) {
-        throw new Error("Lock: Lock '"+lock.path+"' does not exist!");
+    if(!lockConstructors[lock.path]) {
+        throw new Error("Lock '"+lock.path+"' does not exist!");
         return null;
     }
     
-    return new (Lock.lockConstructors[lock.path])(lock);
+    return new (lockConstructors[lock.path])(lock);
 };
 
 Lock.closedLock = function() {
     return Lock.createLock({ path : "closed" });
-}
+};
 
 Lock.openLock = function() {
     return Lock.createLock({ path : "open" });
-}
+};
 
 Lock.registerLock = function (type, constructor) {
-    if(!Lock.lockConstructors)
-        Lock.lockConstructors = [];
+    if(!lockConstructors)
+        lockConstructors = {};
 
-    if(Lock.lockConstructors[type])
+    if(lockConstructors[type])
         // throw new Error(type+" is already a registered lock.");
         return;
 
     if(!constructor)
         throw new Error("Constructor for "+type+" is invalid.");
 
-    Lock.lockConstructors[type] = constructor;
+    lockConstructors[type] = constructor;
 };
 
 // TODO: This static method should be replaced by a version which can
@@ -127,26 +129,25 @@ Lock.initLocks = function() {
             var UserLock = require(PolicyConfig.lockDir+"UserLock.js");
         if(!ActsForLock)
             var ActsForLock = require(PolicyConfig.lockDir+"ActsForLock.js");
-        if(!OpenLock)
-            var OpenLock = require(PolicyConfig.lockDir+"Open.js");
         if(!ClosedLock)
             var ClosedLock = require(PolicyConfig.lockDir+"Closed.js");
         if(!HasIDLock)
             var HasIDLock = require(PolicyConfig.lockDir+"HasIDLock.js");
+        if(!ReputationLockLt)
+            var ReputationLockLt = require(PolicyConfig.lockDir+"ReputationLockLt.js");
+        if(!ReputationLockGt)
+            var ReputationLockGt = require(PolicyConfig.lockDir+"ReputationLockGt.js");
+        if(!AttributeLock)
+            var AttributeLock = require(PolicyConfig.lockDir+"AttributeLock.js");
+        if(!AttributeLockLt)
+            var AttributeLockLt = require(PolicyConfig.lockDir+"AttributeLockLt.js");
+        if(!AttributeLockGt)
+            var AttributeLockGt = require(PolicyConfig.lockDir+"AttributeLockGt.js");
+        if(!AttributeLockEq)
+            var AttributeLockEq = require(PolicyConfig.lockDir+"AttributeLockEq.js");
+        if(!GroupLock) 
+            var GroupLock = require(PolicyConfig.lockDir+"GroupLock.js");
     }
-    
-/*    if(TimePeriodLock)
-        Lock.registerLock("inTimePeriod", TimePeriodLock);
-    if(UserLock)
-        Lock.registerLock("isUser", UserLock);
-    if(HasIDLock)
-        Lock.registerLock("hasID", HasIDLock);
-    if(ActsForLock)
-        Lock.registerLock("actsFor", ActsForLock);
-    if(ClosedLock)
-        Lock.registerLock("closed", ClosedLock);
-    if(OpenLock)
-        Lock.registerLock("open", OpenLock);*/
 };
 
 // Public Methods
@@ -344,7 +345,6 @@ Lock.prototype = {
 
         case 'isOwnedBy' :
             return this.args[0] == lock.args[0];
-
         default:
             throw("Error: Lock: Unknown lock in le");
         }

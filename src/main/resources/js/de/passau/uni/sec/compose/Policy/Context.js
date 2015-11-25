@@ -2,10 +2,17 @@
 
 var Context = (function() {
     var cls = function(context) {
+
+        this.isStatic = false;
+        this.subject = undefined;
+        this.object = undefined;
+        this.locks = undefined;
+
         if(context) {
             this.subject = context.subject;
             this.object = context.object;
             this.locks = context.locks;
+            this.isStatic = context.isStatic;
         }
     };
 
@@ -28,11 +35,15 @@ Context.prototype.getLockState = function(lock, subject) {
     var key = "global";
     if(subject) {
         if(!subject.type)
-            throw new Error("Context: Invalid subject");
+            throw new Error("Context: Invalid subject format!");
         if(subject.type == "msg")
             key = "msg";
-        else 
+        else {
+            if(!subject.data)
+                throw new Error("Context: Invalid subject format!");
+
             key = subject.type + subject.data.id;
+        }
     }
     if(!this.locks[key]) 
         return undefined;
@@ -82,11 +93,16 @@ Context.prototype.addLockState = function(lock, subject, value) {
     var key = "global";
     if(subject) {
         if(!subject.type)
-            throw new Error("Context: Invalid subject");
+            throw new Error("Context: Invalid subject format!");
+        
         if(subject.type == "msg")
             key = "msg";
-        else 
+        else {
+            if(!subject.data)
+                throw new Error("Context: Invalid subject format!");
+
             key = subject.type + subject.data.id;
+        }
     }
     if(!this.locks[key])
         this.locks[key] = {};

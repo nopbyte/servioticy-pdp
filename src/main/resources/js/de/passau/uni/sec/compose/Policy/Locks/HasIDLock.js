@@ -36,17 +36,103 @@ HasIDLock.prototype.copy = function() {
     return c;
 }
 
+HasIDLock.prototype.handleUser = function(context) {
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        if(context.subject.data.reputation > this.args[0])
+            return { result : true, conditional : false };
+        else
+            return { result : false, conditional : false, lock : this };
+    }
+};
+
+HasIDLock.prototype.handleSO = function(context) {
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        if(context.subject.data.id == this.args[0])
+            return { result : true, conditional : false };
+        else
+            return { result : false, conditional : false, lock : this };
+    }
+};
+
+HasIDLock.prototype.handleSU = function(context) {
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        // TODO
+        return { result : true, conditional : false };
+    }
+};
+
+HasIDLock.prototype.handleMsg = function(context) {
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        // TODO
+        return { result : true, conditional : false };
+    }
+};
+
+HasIDLock.prototype.handleNode = function(context) {
+    // TODO
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        // TODO
+        return { result : true, conditional : false };
+    }
+};
+
+HasIDLock.prototype.handleApp = function(context) {
+    if(context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        // TODO
+        return { result : true, conditional : false };
+    }
+};
+
 HasIDLock.prototype.isOpen = function(context) {
     if(context) {
-		if(context.subject.type == 'node') {
-			return { result : (this.args[0] === context.subject.node.id), conditional : false };
-		} else {
-			return { result : true, conditional : false };
-		}
-	} else {
-		throw new Error("HasIDLock: Unable to evaluate lock without context");
+		if(context.subject) {
+            switch(context.subject.type) {
+            case "node" : { 
+                return this.handleNode(context);
+                break; 
+            }
+            case "user" : { 
+                return this.handleUser(context);
+                break;
+            }
+            case "app" : { 
+                return this.handleApp(context);
+                break;
+            }
+            case "so" : { 
+                return this.handleSO(context);
+                break;
+            }
+            case "su" : { 
+                return this.handleSU(context);
+                break;
+            }
+            case "msg" : {
+                return this.handleMsg(context);
+                break;
+            }
+            default : {
+                throw new Error("Unknown context type");
+            }
+            }
+        } else {
+            throw new Error("HasIDLock: Require context.subject information to evaluate lock");
+        }
+        throw new Error("HasIDLock: Require context information to evaluate lock.");
     }
-}
+};
 
 HasIDLock.prototype.lub = function(lock) {
     if(this.eq(lock))

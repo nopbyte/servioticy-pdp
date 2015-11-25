@@ -25,7 +25,7 @@ if(global && typeof print !== "function") {
 var ActsForLock = function(lock) {
     // call the super class constructor
     ActsForLock.super_.call(this, lock);
-}
+};
 
 Lock.registerLock("actsFor", ActsForLock);
 
@@ -37,87 +37,134 @@ ActsForLock.prototype.copy = function() {
 }
 
 ActsForLock.prototype.handleUser = function(context) {
-    return { result : false, conditional : false };
-};
-
-ActsForLock.prototype.handleSO = function(context) {
-    if(context.subject.data.owner_id == this.args[0])
-        return { result : true, conditional : false };
-    else
-        return { result : false, conditional : false };
-};
-
-ActsForLock.prototype.handleSU = function(context) {
-    console.log("ActsForLock.prototype.handleSU: "+context.object.data.owner_id);
-    if(context.object.data.owner_id == this.args[0])
-        return { result : true, conditional : false };
-    else
-        return { result : false, conditional : false };
-};
-
-ActsForLock.prototype.handleMsg = function(context) {
-    if(context) {
-        var open = context.getLockState(this, context.object);
-        /* if(context.object.data)
-            console.log("check lock for node: "+context.object.data.id);
-        console.log("is already open?: "+open); */
-        return { result : open, conditional : false };
+    if(context && context.isStatic) {
+        throw new Error("Not supported"); 
     } else {
-        return { result : false, conditional : false };
+        // a user is always acting for himself in all other cases
+        // we have to return false as we do not support delegation yet
+        if(context.subject.data.id == this.args[0])
+            return { result : true, conditional : false };
+        
+        return { result : false, conditional : false, lock : this };
     }
 };
 
-ActsForLock.prototype.handleNode = function(context) {
-    if(context.subject.data.ownerId == this.args[0])
-        return { result : true, conditional : false };
-    else
-        return { result : false, conditional : false };
+ActsForLock.prototype.handleSO = function(context) {
+    if(context && context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        if(context.subject.data.owner_id == this.args[0])
+            return { result : true, conditional : false };
+        else
+            return { result : false, conditional : false, lock : this };
+    }
 };
 
+ActsForLock.prototype.handleSU = function(context) {
+    if(context && context.isStatic) {
+        throw new Error("Not supported");
+    } else {
+        if(context.object.data.owner_id == this.args[0])
+            return { result : true, conditional : false };
+        else
+            return { result : false, conditional : false, lock : this };
+    }
+};
+
+ActsForLock.prototype.handleMsg = function(context) {
+    if(context && context.isStatic) {
+        var open = undefined;
+        if(context && context.locks)
+            open = context.locks.getLockState(this, context.subject);
+        
+        var conflict = undefined;
+        if(!open) {
+            conflict = this;
+            open = false;
+        }
+        var result = { result : open, conditional : false, lock : conflict };
+        return result;
+    } else {
+        return { result : true, conditional : true };
+    }
+};
+
+// required for dynamic evaluation:
+//    * context.object.data.userInfo - id of the user currently sending data to the flow 
+//                                   (as stored in the message) or the owner of the flow
+ActsForLock.prototype.handleNode = function(context) {
+    if(context && context.isStatic) {
+        return { result : true, conditional : false };
+    } else {
+        if(context.subject && context.subject.data) {
+            if(context.subject.data.userInfo == null) {
+                return { result : false, conditional : false, lock : this };
+            } else {
+                if(context.subject.data.userInfo.id == this.args[0])
+                    return { result : true, conditional : false };
+                else
+                    return { result : false, conditional : false, lock : this };
+            }
+        } else {
+            throw new Error("Invalid context.subject format to evaluate lock");
+        }
+    }
+};
+
+// required for dynamic evaluation: 
+//    * context.object.data.userInfo - id of the user currently sending data to the flow 
+//                                   (as stored in the message) or the owner of the flow
 ActsForLock.prototype.handleApp = function(context) {
-    return { open : false, conditional : false };
+    if(context && context.isStatic) {
+        return { result : false, conditional : false, lock : this };
+    } else {
+        if(context.subject && context.subject.data) {
+            if(context.subject.data.userInfo == null) {
+                return { result : false, conditional : false, lock : this };
+            } else {
+                if(context.subject.data.userInfo.id == this.args[0])
+                    return { result : true, conditional : false };
+                else
+                    return { result : false, conditional : false, lock : this };
+            }
+        } else {
+            throw new Error("Invalid context.subject format to evaluate lock");
+        }
+    }
 };
 
 ActsForLock.prototype.isOpen = function(context) {
     // console.log("ActsForLock.prototype.isOpen");
     if(context) {
 		if(context.subject) {
-            if(!context.static) { // when evaluation dynamically
-                switch(context.subject.type) {
-                case "node" : { 
-                    return this.handleNode(context);
-                    break; 
-                }
-                case "user" : { 
-                    return this.handleUser(context);
-                    break;
-                }
-                case "app" : { 
-                    return this.handleApp(context);
-                    break;
-                }
-                case "so" : { 
-                    return this.handleSO(context);
-                    break;
-                }
-                case "su" : { 
-                    return this.handleSU(context);
-                    break;
-                }
-                case "msg" : {
-                    return this.handleMsg(context);
-                    break;
-                }
-                }
-            } else { // when evaluating statically
-                if(context.subject.ownerId) {
-                    if(context.subject.data.ownerId == this.args[0])
-		                return { result : true, conditional : false };
-                    else
-                        return { result : false, conditional : false };
-                } else {
-                    return { result : true, conditional : true, locks : this };
-                }
+            switch(context.subject.type) {
+            case "node" : { 
+                return this.handleNode(context);
+                break; 
+            }
+            case "user" : { 
+                return this.handleUser(context);
+                break;
+            }
+            case "app" : { 
+                return this.handleApp(context);
+                break;
+            }
+            case "so" : { 
+                return this.handleSO(context);
+                break;
+            }
+            case "su" : { 
+                return this.handleSU(context);
+                break;
+            }
+            case "msg" : {
+                return this.handleMsg(context);
+                break;
+            }
+            default : {
+                throw new Error("Unknown context type");
+            }
             }
         } else {
             throw new Error("ActsForLock: Require context.subject information to evaluate lock");
@@ -136,6 +183,13 @@ ActsForLock.prototype.lub = function(lock) {
         else
             return null;
     }
+};
+
+ActsForLock.prototype.le = function(lock) {
+    if(this.eq(lock))
+        return true;
+    else
+        return false;
 };
 
 if(global && typeof print !== "function")

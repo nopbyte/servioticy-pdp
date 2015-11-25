@@ -37,70 +37,98 @@ UserLock.prototype.copy = function() {
 };
 
 UserLock.prototype.handleUser = function(context) {
-    if (context.subject.data.id == this.args[0]) {
-        return { result : true, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
     } else {
-        return { result : false, conditional : false };
+        if (context.subject.data.id == this.args[0]) {
+            return { result : true, conditional : false };
+        } else {
+            return { result : false, conditional : false, lock : this };
+        }
     }
 };
 
 UserLock.prototype.handleSO = function(context) {
-    return { result : false, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
+    } else {
+        return { result : false, conditional : false, lock : this };
+    }
 };
 
 UserLock.prototype.handleSU = function(context) {
-    return { result : false, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
+    } else {
+        return { result : false, conditional : false, lock : this };
+    }
 };
 
 UserLock.prototype.handleMsg = function(context) {
-    return { result : false, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
+    } else {
+        return { result : false, conditional : false, lock : this };
+    }
 };
 
 UserLock.prototype.handleNode = function(context) {
-    return { result : false, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
+    } else {
+        return { result : false, conditional : false, lock : this };
+    }
 };
 
 UserLock.prototype.handleApp = function(context) {
-    return { result : false, conditional : false };
+    if(context.isStatic) {
+        throw new Error("Not supported yet");
+    } else {
+        return { result : false, conditional : false, lock : this };
+    }
 };
 
 UserLock.prototype.isOpen = function(context) {
     if(context && context.subject) {
-        if(!context.static) {
-            switch(context.subject.type) {
-            case "node" : { 
-                return this.handleNode(context);
-                break; 
-            }
-            case "user" : { 
-                return this.handleUser(context);
-                break;
-            }
-            case "app" : { 
-                return this.handleApp(context);
-                break;
-            }
-            case "so" : { 
-                return this.handleSO(context);
-                break;
-            }
-            case "su" : { 
-                return this.handleSU(context);
-                break;
-            }
-            case "msg" : {
-                return this.handleMsg(context);
-                break;
-            }
-            }
-        } else {
-            throw new Error("Static Analysis for this Lock not implemented yet");
+        switch(context.subject.type) {
+        case "node" : { 
+            return this.handleNode(context);
+            break; 
+        }
+        case "user" : { 
+            return this.handleUser(context);
+            break;
+        }
+        case "app" : { 
+            return this.handleApp(context);
+            break;
+        }
+        case "so" : { 
+            return this.handleSO(context);
+            break;
+        }
+        case "su" : { 
+            return this.handleSU(context);
+            break;
+        }
+        case "msg" : {
+            return this.handleMsg(context);
+            break;
+        }
+        default : {
+            throw new Error("Unknown context type");
+        }
         }
     } else {
         throw new Error("No subject defined for UserLock evalution");
-        // should not get here
-        return { result : false, conditional : false };
     }
+};
+
+UserLock.prototype.le = function(lock) {
+    if(this.eq(lock))
+        return true;
+    else
+        return false;
 };
 
 UserLock.prototype.lub = function(lock) {

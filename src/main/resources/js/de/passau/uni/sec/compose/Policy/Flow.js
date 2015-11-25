@@ -115,6 +115,8 @@ var Flow = (function() {
         },
 
         le : function(otherFlow) {
+            // console.log("LE: "+this+" <= "+otherFlow);
+
             var conflictLocks = [];
             var result = undefined;
 
@@ -142,8 +144,6 @@ var Flow = (function() {
 
             for(var l1 in this.locks) {
                 var lock1 = this.locks[l1];
-                
-                // console.log("check whether lock "+JSON.stringify(lock1)+" is contained in "+JSON.stringify(otherFlow.locks));
                 
                 if(!otherFlow.locks || otherFlow.locks.length === 0) {
                     complies = false;
@@ -173,6 +173,7 @@ var Flow = (function() {
                     }
                 }
             }
+            // console.log("\t=> "+complies);
 
             return complies;
         },
@@ -183,44 +184,47 @@ var Flow = (function() {
             var conditional = false;
             var resLocks = [];
 
-
             if(this.locks !== null) {
                 var f = this;
                 this.locks.forEach(function(lock, i) {
                     var s = undefined;
+
+                    // console.log("lock: "+lock);
+                    // console.log("Current lock state: ",context.locks);
+
                     // check whether lockstate is already in context
                     if(context) {
                         s = context.getLockState(lock, context.subject);
                     }
+                    // console.log("LOCK STATE: ",s);
+                    // console.log("CONTEXT STATE: ",context.isStatic);
                     
                     // lock state is not know => compute it
                     if(s == undefined) {
                         s = lock.isOpen(context);
-                        if(context)
+                        // console.log("compute state of "+lock+": ",s);
+                        // console.log("sibject is: ",context.subject);
+                        if(context && s && s.conditional == false)
                             context.addLockState(lock, context.subject, s.result);
                     } else {
-                        s = { result : s, conditional : false };
+                        s = { result : s, conditional : false, lock : lock };
                     }
                     
                     allopen = allopen && s.result;
                     conditional = conditional || s.conditional;
 
                     if(!s.result || s.conditional) {
-                        s.id = f.id;
-                        if(s.locks)
-                            conflictLocks = conflictLocks.concat(s.locks);
+                        // s.id = f.id;
+                        if(s.lock) {
+                            conflictLocks.push(s.lock);
+                        }
                     }
                 });
 
-                /* for(var i in conflictLocks) {
-                   console.log("conflicting lock "+i+": "+conflictLocks[i]);
-                   }
-                */
-                
                 if(conflictLocks.length) {
-                    var dummyFlow = new Flow({ target : {type : 'any'} });
+                    var dummyFlow = new Flow({ target : { type : 'any' } });
                     for(var cl in conflictLocks) {
-                        dummyFlow.lubLock(conflictLocks[cl]);
+                        dummyFlow.locks = dummyFlow.lubLock(conflictLocks[cl]);
                     }
                     resLocks = dummyFlow.locks;
                 }
@@ -230,6 +234,8 @@ var Flow = (function() {
 
             if(resLocks && resLocks.length)
                 result.locks = resLocks;
+
+            // console.log("getClosedLocks result: ", result);
 
             return result;
         },
@@ -243,25 +249,24 @@ var Flow = (function() {
             var merged = false;
             var conflict = false;
             
-            // console.log("-----------------------");
-            // console.log("this: "+this);
-            // console.log("Factor: "+factor);
+            /* 
+             console.log("-----------------------");
+             console.log("this: "+this);
+             console.log("Factor: "+factor);
+             */
             
             
             var lock = factor.copy();
 
             for(var i = 0; i < l; i++) {
                 var newLock = this.locks[i].lub(lock);
-                // console.log("Mul with: "+this.locks[i]);
-                // console.log("NewLock: "+newLock);              
-
                 // if the lub returns null, we cannot compute it
                 if(newLock) {
                     if(newLock.path.length) {
                         newLocks.push(newLock);
                         merged = true;
                     } else 
-                        throw new Error("Flow: The result of the least upper bound must be either null or a real lock");
+                        throw new Error("Flow: The result of the least upper bound must be either null or a real lock. However, the lock '"+JSON.stringify(newLock)+"' was generated from '"+this.locks[i]+"' and '"+lock+"'");
                 } else {
                     newLocks.push(this.locks[i]);
                 }
@@ -270,10 +275,7 @@ var Flow = (function() {
             if(!merged) {
                 newLocks.push(lock);
             }
-            
-            // console.log("Resulting locks: "+newLocks);
-            
-            // this.locks = newLocks;
+
             return newLocks;
         },
 

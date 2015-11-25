@@ -22,31 +22,32 @@ if(global && typeof print !== "function") {
     var system = require(PolicyConfig.rootDir + "./../system.js");
 }
 
-var GroupLock = function(lock) {
+var AttributeLock = function(lock) {
     // call the super class constructor
-    GroupLock.super_.call(this, lock);
+    AttributeLock.super_.call(this, lock);
 }
 
-Lock.registerLock("inGroup", GroupLock);
+Lock.registerLock("hasAttribute", AttributeLock);
 
-system.inherits(GroupLock, Lock);
+system.inherits(AttributeLock, Lock);
 
-GroupLock.prototype.copy = function() {
-    var c = new GroupLock(this);
+AttributeLock.prototype.copy = function() {
+    var c = new AttributeLock(this);
     return c;
-};
+}
 
-GroupLock.prototype.isMember = function(groups) {
-    var isMember = false;
-    for(var g in groups) {
-        var group = groups[g];
-        if(group.group_id == this.args[0]) {
-            isMember = true;
+AttributeLock.prototype.hasAttribute = function(attributes) {
+    var hasAttribute = false;
+    for(var g in attributes) {
+        var attribute = attributes[g];
+        if(attribute.attribute_definition_id == this.args[1] && 
+           attribute.group_id == this.args[0]) {
+            hasAttribute = true;
             break;
         }
     }
 
-    return isMember;
+    return hasAttribute;
 };
 
 // required for dynamic evaluation:
@@ -54,55 +55,53 @@ GroupLock.prototype.isMember = function(groups) {
 //    * context.subject.data.token - accesstoken of the user
 //
 //    * context.subject.data.idm - reference to idm to get info about current user
-GroupLock.prototype.handleUser = function(context) {
+AttributeLock.prototype.handleUser = function(context) {
     var currentIDMInfo = null;
-    var isMember = false;
-
     if(context.isStatic) {
-        throw new Error("Not support for static eval yet");
+        throw new Error("Not supported yet");
     } else {
-        // group membership already passed to the call (e.g. when checked in servIoTicy)
-        if(context.subject.data.approvedMemberships) {
+        // approved values already passed to the call (e.g. when checked in servIoTicy)
+        if(context.subject.data.attributeValues) {
             currentIDMInfo = context.subject.data;
         } else {
             if(context.subject && context.subject.data && context.subject.data.idm) {
                 if(context.subject.data.id) 
-                    currentIDMInfo = context.subject.data.idm.getIDMInfoSync(context.subject.data.id);
+                    currentIDMInfo = context.subject.data.idm.getIDMInfo(context.subject.data.id);
                 if(context.subject.data && context.subject.data.token) 
                     currentIDMInfo = context.subject.data.idm.getAttributesByToken(context.subject.data.token);
             }
         }
-        
-        if(currentIDMInfo && currentIDMInfo.approvedMemberships) {
-            isMember = this.isMember(currentIDMInfo.approvedMemberships);
-            if(isMember)
+
+        if(currentIDMInfo && currentIDMInfo.attributeValues) {
+            var hasAttribute = this.hasAttribute(currentIDMInfo.attributeValues);
+            if(hasAttribute)
                 return { result : true, conditional : false };
+            else
+                return { result : false, conditional : false, lock : this };
         }
-        return { result : false, conditional : false, lock : this };    
     }
 };
 
 // required for dynamic evaluation:
 //    * context.subject.data - must contain the SO record for this SO
-GroupLock.prototype.handleSO = function(context) {
+AttributeLock.prototype.handleSO = function(context) {
     if(context.isStatic) {
         throw new Error("Not supported yet");
     } else {
-        if(context && context.subject && context.subject.data) {
-            var isMember = this.isMember(context.subject.data.groups);
-            if(isMember)
+        if(context.subject && context.subject.data && context.subject.data.attributeValues) {
+            var hasAttribute = this.hasAttribute(context.subject.data.attributeValues);
+            if(hasAttribute)
                 return { result : true, conditional : false };
             else
-                return { result : false, conditional : false, lock : this };
-        } else {
-            throw new Error("Invalid context.subject format");
+                return { result : false, conditional : false, lock: this };
         }
+        return { result : false, conditional : false, lock : this };
     }
 };
 
 // required for dynamic evaluation:
 //    * nothing (however, indicate lock as conditionally open (state will not be added to context))
-GroupLock.prototype.handleSU = function(context) {
+AttributeLock.prototype.handleSU = function(context) {
     if(context.isStatic) {
         throw new Error("Not supported yet");
     } else {
@@ -112,28 +111,24 @@ GroupLock.prototype.handleSU = function(context) {
 };
 
 // required for dynamic evaluation:
-//    * nothing (however, indicate lock as conditionally open (state will not be added to context)
-GroupLock.prototype.handleMsg = function(context) {
+//    * nothing (however, indicate lock as conditionally open (state will not be added to context))
+AttributeLock.prototype.handleMsg = function(context) {
     if(context.isStatic) {
-        return { result : true, conditional : true };
+        throw new Error("Not supported yet");
     } else {
         return { result : true, conditional : true };
     }
 };
 
-// required for static evaluation: 
-//    There is no instance ID in the static case as this application does not exist yet!
-//    Ignore the lock conflicts in this case!
-//
 // required for dynamic evaluation:
-//    * context.subject.data.instanceId - the id of the application this node is embedded inside
-//    * context.subject.data.idm - the reference to IDM cache to get the latest info about the embedding flow
-GroupLock.prototype.handleNode = function(context) {
+//    * context.subject.data.instanceId - ID of application this node is embedded inside
+//
+//    * context.subject.data.idm - reference to idm to get info about the embedding application
+AttributeLock.prototype.handleNode = function(context) {
     var currentIDMInfo = null;
-    var isMember = false;
 
     if(context.isStatic) {
-        return { result : true, conditional : true };    
+        throw new Error("Not supported yet");
     } else {
         if(context.subject && context.subject.data) {
             if(context.subject.data.instanceId) {
@@ -144,35 +139,27 @@ GroupLock.prototype.handleNode = function(context) {
             }
         } else
             throw new Error("Invalid subject context format (no subject data delivered)");
-
-        if(currentIDMInfo && currentIDMInfo.groups) {
-            isMember = this.isMember(currentIDMInfo.groups);
-            if(isMember)
+        
+        if(currentIDMInfo && currentIDMInfo.attributeValues) {
+            var hasAttribute = this.hasAttribute(currentIDMInfo.attributeValues);
+            if(hasAttribute)
                 return { result : true, conditional : false };
+            else
+                return { result : false, conditional : false, lock: this };
         }
-
         return { result : false, conditional : false, lock : this };
     }
 };
 
 // required for dynamic evaluation:
-//    * context.subject.data.remoteFlowId - the id of the remotely running application
-//    * context.subject.data.idm - the reference to IDM cache to get the latest info about the remote flow
-GroupLock.prototype.handleApp = function(context) {
+//    * context.subject.data.instanceId - ID of application this node is embedded inside
+//
+//    * context.subject.data.idm - reference to idm to get info about this application
+AttributeLock.prototype.handleApp = function(context) {
     var currentIDMInfo = null;
-    var isMember = false;
 
     if(context.isStatic) {
-
-        if(context.subject.data && context.subject.data.remoteFlowId) 
-            currentIDMInfo = context.subject.data.idm.getIDMInfoSync(context.subject.data.remoteFlowId);
-
-        if(currentIDMInfo) {
-            isMember = this.isMember(currentIDMInfo.groups);
-            if(isMember)
-                return { result : true, conditional : false };
-        }
-        return { result : false, conditional : false, lock : this };
+        throw new Error("Not supported yet");
     } else {
         if(context.subject && context.subject.data) {
             if(context.subject.data.remoteFlowId) {
@@ -186,17 +173,18 @@ GroupLock.prototype.handleApp = function(context) {
            throw new Error("Invalid subject context format (no subject data provided)");
         }
 
-        if(currentIDMInfo && currentIDMInfo.groups) {
-            isMember = this.isMember(currentIDMInfo.groups);
-            if(isMember)
+        if(currentIDMInfo && currentIDMInfo.attributeValues) {
+            var hasAttribute = this.hasAttribute(currentIDMInfo.attributeValues);
+            if(hasAttribute)
                 return { result : true, conditional : false };
-            
+            else
+                return { result : false, conditional : false, lock: this };
         }
         return { result : false, conditional : false, lock : this };
     }
 };
 
-GroupLock.prototype.isOpen = function(context) {
+AttributeLock.prototype.isOpen = function(context) {
     if(context && context.subject) {
         switch(context.subject.type) {
         case "node" : { 
@@ -224,19 +212,19 @@ GroupLock.prototype.isOpen = function(context) {
             break;
         }
         }
-        throw new Error("GroupLock: Require context information to evaluate lock.");
+    } else {
+        throw new Error("AttributeLock: Require context information to evaluate lock.");
     }
 };
 
-GroupLock.prototype.lub = function(lock) {
+AttributeLock.prototype.lub = function(lock) {
     if(this.eq(lock))
         return Lock.createLock(this);
-    else {
+    else
         return null;
-    }
 };
 
-GroupLock.prototype.le = function(lock) {
+AttributeLock.prototype.le = function(lock) {
     if(this.eq(lock))
         return true;
     else
@@ -244,4 +232,4 @@ GroupLock.prototype.le = function(lock) {
 };
 
 if(global && typeof print !== "function")
-    module.exports = GroupLock;
+    module.exports = AttributeLock;

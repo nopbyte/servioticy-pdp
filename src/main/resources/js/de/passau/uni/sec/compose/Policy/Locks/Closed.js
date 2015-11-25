@@ -20,8 +20,12 @@ ClosedLock.prototype.copy = function() {
     return c;
 }
 
+ClosedLock.prototype.eq = function(lock) {
+    return (lock.path == this.path) && (this.not == lock.not);
+}
+
 ClosedLock.prototype.isOpen = function(context) {
-    return { open : false, conditional : false }
+    return { open : false, conditional : false };
 }
 
 ClosedLock.prototype.lub = function(lock) {

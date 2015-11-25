@@ -1,8 +1,10 @@
 package de.passau.uni.sec.compose.pdp.servioticy.policy;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.Reader;
 
 import javax.script.ScriptEngine;
@@ -47,13 +49,13 @@ public class PolicyEvaluation {
 				sb.append("\n" + line);
 			}
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
-				} catch (Exception e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -63,16 +65,43 @@ public class PolicyEvaluation {
 
 	}
 
+	
+	public PolicyEvaluation() {
+		String currentJsCode = "";
+		String fileList[] = {"Flow.js", "system.js", "PolicyConfig.js", "PolicySet.js", "Policy.js", "ContractFlow.js", "Lock.js", "LockContext.js", "Context.js", "Entity.js", "Contract.js", "Locks/TimePeriodLock.js", "Locks/Closed.js", "Locks/IsEqLock.js", "Locks/Open.js", "Locks/IsEq.js", "Locks/GroupLock.js", "Locks/HasIDLock.js", "Locks/UserLock.js", "Locks/IsLtLock.js", "Locks/ActsForLock.js","postLoadInit.js"};
+		String path = "/js/de/passau/uni/sec/compose/Policy/";
+
+		for (int i = 0; i < fileList.length; i++){
+			System.out.println("jar " + path + fileList[i]);
+			InputStream resource = PolicyEvaluation.class.getResourceAsStream(path + fileList[i]);
+			currentJsCode = getStringFromInputStream(resource);
+			try {
+				writeFile(currentJsCode, ""+i);
+				engine.eval(currentJsCode);
+				currentJsCode = "";
+			} catch (Exception eJS) {
+				currentJsCode = "";
+				System.out.println("PDP-JS: " + eJS);
+				writeFile("PDP-JS: " + eJS, "Excep"+ i);
+				error = true;
+			}
+		}
+	
+	}
+
+	
+	
 
 
 
 	/*
 	 * Constructor, loads the main files and all locks (including the registration of the logs)
 	 */
-	public PolicyEvaluation() {
+	public void PolicyEvaluationA() {
 		Boolean inJar = false;
 	  error = false;
 		String currentJsCode = "";
+		int bbTemp = 0;
 
 		try {
 			CodeSource src = PolicyEvaluation.class.getProtectionDomain().getCodeSource();
@@ -94,9 +123,12 @@ public class PolicyEvaluation {
 	        		   currentJsCode = getStringFromInputStream(resource);
 	        		   //System.out.println("Data: " + currentJsCode);
 	        		   try {
+	        			   bbTemp++;
+	   					writeFile("name: " + currentJsCode, "File" + bbTemp);
 	        			   engine.eval(currentJsCode);
-	        		   } catch (Exception eJS) {
+	        		   } catch (ScriptException eJS) {
 	        			   System.out.println("PDP-JS: " + eJS);
+	   					writeFile(name + "PDP-JS: " + eJS, "Excep2-" + bbTemp);
 	        			   error = true;
 	        		   }
 	    			}
@@ -106,7 +138,7 @@ public class PolicyEvaluation {
 				   System.out.println("PDP-JS could not get the list of files");
     			   error = true;
 			}
-		} catch (Exception e2) {
+		} catch (IOException e2) {
 			   System.out.println("PDP-JS could not get the list of files: " + e2);
 			   error = true;
 		}
@@ -131,9 +163,12 @@ public class PolicyEvaluation {
 		        		   currentJsCode = getStringFromInputStream(resource);
 		        		   //System.out.println("Data: " + currentJsCode);
 		        		   try {
+		        			   bbTemp++;
+			   					writeFile("name: " + currentJsCode, "FileLock" + bbTemp);
 		        			   engine.eval(currentJsCode);
-		        		   } catch (Exception eJS) {
+		        		   } catch (ScriptException eJS) {
 		        			   System.out.println("PDP-JS: " + eJS);
+		   					writeFile("PDP-JS: " + eJS, "Excep1-" + bbTemp);
 		        			   error = true;
 		        		   }
 		    			}
@@ -143,22 +178,28 @@ public class PolicyEvaluation {
 					   System.out.println("PDP-JS could not get the list of files");
 	    			   error = true;
 				}
-			} catch (Exception e2) {
+			} catch (IOException e2) {
 				   System.out.println("PDP-JS could not get the list of files: " + e2);
+					writeFile("PDP-JS: " + e2, "Excep4");
 				   error = true;
 			}
+			
+		} // TODO move behind the post load init
 			// Post load init
 			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 					System.out.println("jar /js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
 			   InputStream resource = PolicyEvaluation.class.getResourceAsStream("/js/de/passau/uni/sec/compose/Policy/postLoadInit.js");
 			   currentJsCode = getStringFromInputStream(resource);
 			   try {
+    			   bbTemp++;
+					writeFile("name: " + currentJsCode, "FilePostInit");
 				   engine.eval(currentJsCode);
 			   } catch (Exception eJS) {
 				   System.out.println("PDP-JS: " + eJS);
+					writeFile("PDP-JS: " + eJS, "Excep5");
 				   error = true;
 			   }
-			 }
+			 
 
 			 if (inJar == false){
 				 // Load files local
@@ -216,6 +257,8 @@ public class PolicyEvaluation {
 	 */
 	public boolean checkFlow(JsonNode SO, JsonNode inputSU, String stream){
 		boolean ret = false;
+
+		
 		System.out.println("Check access with init-error:" + error);
 		String code = "";
 		// Get policys (works if it is inside the security section or if it is at the highest level)
@@ -246,9 +289,13 @@ public class PolicyEvaluation {
 		code += "cont = new Context({subject : {type : 'so', data:" + secSO.toString() + "},object : {type :'su',data :" + secSU.toString() + "}});";
 		//code += "cont = {subject : " + secSO.toString() + ",object : " + secSU.toString() + "};"; // context.subject = SO.Security context.object = SU.security
 		code += "entDes = new Entity(" + entity + ");";
-		code += "pSet = new PolicySet(" + policySO.toString() +");";
+		
+		code += "var poTemp = "+ policySO.toString() + ";";
+		code += "for (var i = 0; i < poTemp.length; i++){if(poTemp[i].hasOwnProperty(\"object\")){ poTemp[i].object.type = poTemp[i].object.type.toLowerCase();}} ;";
+		code += "pSet = new PolicySet(poTemp);";
 		//code += "print(\"PolicySet \"+JSON.stringify(pSet));";
-		code += "pSO = pSet.getBestMatchPolicy(entDes);";
+		code += "pSO = new Policy(pSet.getBestMatchPolicy(entDes));";
+		//code += "pSO.entity = null;";
 		code += "print(\"Best match \"+JSON.stringify(pSO));";
 		code += "print(\"\\n\");";
 		code += "pSU = new Policy(" + policySU.toString()+");";
@@ -277,6 +324,7 @@ public class PolicyEvaluation {
 	 */
 	public boolean checkAccess(JsonNode SU, String user, JsonNode userInfo){
 		boolean ret = false;
+		writeFile("SU: " + SU + "\n user: " + user + "\n userInfo: " + userInfo, "CheckAccess");
 		System.out.println("Check access with init-error:" + error);
 		String code = "";
 		// Get policys (works if it is inside the security section or if it is at the highest level)
@@ -287,7 +335,10 @@ public class PolicyEvaluation {
 			System.out.println("DPD-JS: no Policy found");
 			return false;
 		}
-
+		
+		if (user.contains("\"")){
+			user = user.substring(1, user.length()-1);
+		}
 		// Build entity
 		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
 		System.out.println("Entitiy: " + entity);
@@ -319,6 +370,7 @@ public class PolicyEvaluation {
 				ret = (Boolean) retJS;
 			} else {ret = false;};
 	    } catch (ScriptException e) {
+			writeFile("PDP-JS: " + e, "CheckAccessExec");
 			System.out.println("PDP-JS: " + e);
 			ret = false;
 		}
@@ -348,12 +400,18 @@ public class PolicyEvaluation {
 			secSO = SO;
 		}
 		
+		if (user.contains("\"")){
+			user = user.substring(1, user.length()-1);
+		}
+		writeFile("SO " + SO + " user: " + user + " userInfo: " + userInfo, "check");
 		// Build entity
 		JsonNode idSO = secSO.get("id");
 		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
 		String entitySO = "{\"type\" : \"so\", \"id\":" + idSO + "}";
 		System.out.println("EntitiySO: " + entitySO);
+		System.out.println("Entitiy: " + entity);
 		System.out.println("SO sec: " + secSO.toString());
+		System.out.println("policySO: " + policySO.toString());
 		//System.out.println("User: " + userInfo.toString());
 
 		// context.subsject = {IDM result} contect.object = SU.security
@@ -368,14 +426,22 @@ public class PolicyEvaluation {
 		code += "print(\"\\n\");";
 		code += "entDes = new Entity(" + entitySO + ");";
 		code += "print(\"\\n3\");";
-		code += "pSet = new PolicySet(" + policySO.toString() +");";
-		code += "print(\"\\n\");";
-		code += "pSO = pSet.getBestMatchPolicy(entDes);";
+		code += "var poTemp = "+ policySO.toString() + ";";
+
+		code += "for (var i = 0; i < poTemp.length; i++){if(poTemp[i].hasOwnProperty(\"object\")){ poTemp[i].object.type = poTemp[i].object.type.toLowerCase();}} ;";
+		code += "print(\"poTemp \"+JSON.stringify(poTemp));";
+		code += "pSet = new PolicySet(poTemp);";
+		code += "print(\"\\n4\");";
+		code += "pSO = new Policy(pSet.getBestMatchPolicy(entDes));";
+		//code += "pSO.entity = null;";
 		//code += "pSO = new Policy(pSO.flows)";
 		//code += "pSO = new Policy(" + policySO.get("flows").toString()+");";
 		code += "entDes = new Entity(" + entity + ");";
 		code += "print(\"pSO \"+JSON.stringify(pSO));";
 		code += "print(\"\\n\");";
+	
+
+		
 		code += "ret = pSO.checkAccess(entDes, Policy.Operation.READ, cont);";
 		code += "print(\"ret check Access\"+JSON.stringify(ret));";
 		code += "ret = ret.result";
@@ -386,8 +452,10 @@ public class PolicyEvaluation {
 			System.out.println("\nRET in Java: " + retJS);
 			if (retJS instanceof Boolean){
 				ret = (Boolean) retJS;
+				writeFile("Ret: " + ret, "Ret");
 			} else {ret = false;};
 	    } catch (ScriptException e) {
+			writeFile("PDP-JS: " + e, "Excep0");
 			System.out.println("PDP-JS: " + e);
 			ret = false;
 		}
@@ -411,7 +479,9 @@ public class PolicyEvaluation {
 			System.out.println("DPD-JS: no Policy found");
 			return false;
 		}
-
+		if (user.contains("\"")){
+			user = user.substring(1, user.length()-1);
+		}
 		// Build entity
 		String entity = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
 		System.out.println("Entitiy: " + entity);
@@ -450,10 +520,11 @@ public class PolicyEvaluation {
 	}
 
 	/*
-	 * Checks the policy of SO against a user WTP
+	 * Checks the policy of SO against a user OTP
 	 */
 	public boolean checkWriteAccess(JsonNode SO, String user, JsonNode userInfo, String stream){
 		boolean ret = false;
+		writeFile("SU: " + SO + "\n user: " + user + "\n userInfo: " + userInfo + "\n stream: " + stream, "CheckAccessOTP");
 		System.out.println("Check access with init-error:" + error);
 		String code = "";
 		// Get policys (works if it is inside the security section or if it is at the highest level)
@@ -469,7 +540,9 @@ public class PolicyEvaluation {
 		if (secSO == null){
 			secSO = SO;
 		}
-
+		if (user.contains("\"")){
+			user = user.substring(1, user.length()-1);
+		}
 
 		// Build entity
 		JsonNode idSO = secSO.get("id");
@@ -481,17 +554,41 @@ public class PolicyEvaluation {
 
 		}
 		String entityU = "{\"type\" : \"user\", \"id\":\"" + user + "\"}";
-
+	
 		System.out.println("Entitiy: " + entitySO);
+		System.out.println("PolicySO: " + policySO.toString());
 		// context.subsject = {IDM result} contect.object = SU.security
 
 		// Generate analysis code
 		code += "cont = new Context({subject : {type : 'user', data:" + userInfo.toString() + "},object : {type : 'so',data:" + secSO.toString() + "}});";
-		code += "entDes = new Entity(" + entitySO + ");";
+		code += "print(\"\\n\");";
+		code += "print(\"cont \"+JSON.stringify(cont));";
+		code += "print(\"\\n\");";
 
-		code += "pSet = new PolicySet(" + policySO.toString() +");";
-		//code += "print(\"PolicySet \"+JSON.stringify(pSet));";
-		code += "pSO = pSet.getBestMatchPolicy(entDes);";
+
+		
+		code += "entDes = new Entity(" + entitySO + ");";
+		code += "print(\"\\n\");";
+		code += "print(\"entDes \"+JSON.stringify(entDes));";
+		code += "print(\"\\n\");";
+		code += "var poTemp = "+ policySO.toString() + ";";
+		code += "print(\"poTemp \"+JSON.stringify(poTemp));";
+		code += "print(\"\\n\");";
+
+		code += "for (var i = 0; i < poTemp.length; i++){if(poTemp[i].hasOwnProperty(\"object\")){ poTemp[i].object.type = poTemp[i].object.type.toLowerCase();}} ;";
+		code += "print(\"poTemp \"+JSON.stringify(poTemp));";
+		code += "print(\"\\n\");";
+
+		code += "pSet = new PolicySet(poTemp);";
+		code += "print(\"\\n\");";
+		code += "print(\"PolicySet \"+JSON.stringify(pSet));";
+		code += "print(\"\\n\");";
+
+		code += "pSO = new Policy(pSet.getBestMatchPolicy(entDes));";
+		code += "print(\"Pso \"+JSON.stringify(pSO));";
+		code += "print(\"\\n\");";
+
+		//code += "pSO.entity = null;";
 		code += "entDes = new Entity(" + entityU + ");";
 		code += "print(\"cont \"+JSON.stringify(cont));";
 		code += "print(\"\\n\");";
@@ -509,9 +606,44 @@ public class PolicyEvaluation {
 				ret = (Boolean) retJS;
 			} else {ret = false;};
 	    } catch (ScriptException e) {
+			writeFile("PDP-JS: " + e, "CheckAccessOTPExce");
 			System.out.println("PDP-JS: " + e);
 			ret = false;
 		}
 		return ret;
 	}
+	
+	
+	
+	private void writeFile(String data, String file){
+		BufferedWriter writer = null;
+		try
+		{
+		    writer = new BufferedWriter( new FileWriter("/tmp/servioticy"+ file +".log"));
+		    writer.write( data);
+
+		}
+		catch ( IOException e)
+		{
+		}
+		finally
+		{
+		    try
+		    {
+		        if ( writer != null)
+		        writer.close( );
+		    }
+		    catch ( IOException e)
+		    {
+		    }
+		}
+		
+		
+	}
+	
+	
+	
+	
+	
+	
 }

@@ -25,8 +25,6 @@ if(global && typeof print !== "function") {
 var TimePeriodLock = function(lock) {
     // call the super class constructor
     TimePeriodLock.super_.call(this, lock);
-
-    // print("TimePeriodLock Constructor");
 };
 
 Lock.registerLock("inTimePeriod", TimePeriodLock);
@@ -40,8 +38,7 @@ TimePeriodLock.prototype.copy = function() {
 }
 
 TimePeriodLock.prototype.isOpen = function(context) {
-    console.log("TimePeriodLock.prototype.isOpen");
-    if(context && !context.static) {
+    if(context && !context.isStatic) {
         var currentDate = new Date();
         var hours = currentDate.getHours();
         var mins = currentDate.getMinutes();
@@ -51,11 +48,11 @@ TimePeriodLock.prototype.isOpen = function(context) {
         
         if(this.args[0] <= currentTime &&
            this.args[1] >= currentTime)
-            return { result : true, conditional : false }
+            return { result : true, conditional : false };
         else
-            return { result : false, conditional : false }
+            return { result : false, conditional : false };
     } else {
-        return { result : true, conditional : true, locks : this }
+        return { result : true, conditional : true, lock : this };
     }
 }
 
@@ -89,7 +86,7 @@ TimePeriodLock.prototype.lub = function(lock) {
     
     // check whether intervals overlap
     if(start2 >= end1) {
-        return new Lock();
+        return Lock.closedLock();
     } else {
         if(start1 < start2) {
             newStart = start2;
@@ -107,7 +104,7 @@ TimePeriodLock.prototype.lub = function(lock) {
     // console.log("ns: %j, ne: %j", newStart, newEnd);
 
     if(newStart >= newEnd)
-        return new Lock();
+        return Lock.closedLock();
 
     if(newStart < 0)
         newStart = newStart + 2400;

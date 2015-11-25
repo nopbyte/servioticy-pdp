@@ -27,159 +27,78 @@ if(global && typeof print !== "function") {
 
 var Policy = (function() {
 
-    function processConflicts(conflicts) {
-        var result = [];
-
-        var grant = false;
-        var conditional = true;
-
-        if(conflicts.length) {
-            for(var c in conflicts) {
-                var conflict = conflicts[c];
-
-                result.push(conflict);
-
-                grant = grant || conflict.allopen;
-
-                if(conflict.allopen) {
-                    conditional = conditional && conflict.conditional;
-                }
-            }
-            if(!grant)
-                conditional = false;
-        }
-
-        if(result.length) {
-            return { result : grant, conditional : conditional, evals : result };
-        } else {
-            return { result : grant, conditional : conditional };
-        }
-    }
-
-
-    function mergeConflicts(result1, result2) {
-        var result = [];
-
-        /*
-         console.log();
-         console.log("Merge result1 and result2:");
-         console.log("result1: "+JSON.stringify(result1));
-         console.log("result2: "+JSON.stringify(result2));
-         */
-
+    function processConflicts(conflicts1, conflicts2) {
         var grant1 = false, grant2 = false, finalgrant = false;
         var conditional1 = true, conditional2 = true, finalconditional = true;
 
-        if(!result1.length && result2.length) {
-            result1 = result2;
-            result2 = [];
-        }
+        var conflicts = [];
 
-        if(result1.length && !result2.length) {
-            for(var r1 in result1) {
-                var res1 = result1[r1];
+        if(!conflicts1)
+            throw new Error("Conflict1 must be defined!");
 
-                result.push(res1);
-
-                grant1 = grant1 || res1.allopen;
-                if(res1.allopen) {
-                    conditional1 = conditional1 && res1.conditional;
-                }
-            }
-            if(grant1)
-                conditional1 = false;
-        }
-
-        if(result1.length && result2.length) {
-            for(var r1 in result1) {
-                var res1 = result1[r1];
-                // console.log("\tRES1: "+JSON.stringify(res1));
-
-                if(!res1.locks) {
-                    // console.log("\tPush RES1");
-                    result.push(res1);
-
-                    grant1 = grant1 || res1.allopen;
-                    if(res1.allopen) {
-                        conditional1 = conditional1 && res1.conditional;
-                    }
-                } else {
-                    var f1 = new Flow({ target : { type : 'any' } });
-                    if(res1.locks && res1.locks.length) {
-                        f1.locks = res1.locks;
-                    }
-
-                    for(var r2 in result2) {
-                        var res2 = result2[r2];
-                        // console.log("\tRES2: "+JSON.stringify(res2));
-
-                        if(res2.locks && !res2.entity) {
-                            var f2 = new Flow({ target : { type : 'any' } });
-                            if(res2.locks && res2.locks.length) {
-                                f2.locks = res2.locks;
-                            }
-                            /* console.log("Dummy Flows:");
-                             console.log("\tf1: "+f1);
-                             console.log("\tf2: "+f2);*/
-                            // TODO: the lub may yield unsatisfiable locks => take care before pushing the final result!!!
-                            // TODO: Check whether the stuff above can be handled by alwaysclosed lock
-                            f1 = f1.lub(f2);
-
-                            var allopen = res1.allopen && res2.allopen;
-                            var conditional = allopen && (res1.conditional || res2.conditional);
-                            var idArray = res1.id.concat(res2.id);
-                            result.push({ ids : idArray, "allopen" : allopen, "conditional" : conditional, "locks" : f1.locks });
-
-                            finalgrant = finalgrant || allopen;
-                            if(allopen) {
-                                finalconditional = finalconditional && conditional;
-                            }
-                        }
-                    }
-                }
-            }
-
-            for(var r2 in result2) {
-                var res2 = result2[r2];
-                if(!res2.locks) {
-                    result.push(res2);
-
-                    // console.log("ADD RES2: "+JSON.stringify(res2));
-
-                    grant2 = grant2 || res2.allopen;
-                    if(res2.allopen) {
-                        conditional2 = conditional2 && res2.conditional;
-                    }
-                }
-            }
-        }
-
-        if(!grant1) {
-            conditional1 = false;
-        }
-
-        if(!grant2) {
+        if(!conflicts2) {
+            grant2 = true;
             conditional2 = false;
         }
 
-        if(!finalgrant) {
-            finalconditional = false;
+        /*
+         console.log();
+         console.log("Merge conflict1 and conflict2:");
+         console.log("conflict1: "+JSON.stringify(conflicts1));
+         console.log("conflict2: "+JSON.stringify(conflicts2));
+         */
+
+        for(var c1 in conflicts1) {
+            var conflict1 = conflicts1[c1];
+
+            if(conflict1.locks)
+                conflicts = conflicts.concat(conflict1.locks);
+            else if(conflict1.entity)
+                conflicts.push({ type : conflict1.entity.type });
+
+            // only one lock set needs to be open
+            grant1 = grant1 || conflict1.allopen;
+
+            if(conflict1.allopen) {
+                conditional1 = conditional1 && conflict1.conditional;
+            }
         }
 
-        /* console.log("\tGrant1: "+grant1);
-         console.log("\tCond1: "+conditional1);
-         console.log("\tGrant2: "+grant2);
-         console.log("\tCond2: "+conditional2);*/
+        for(var c2 in conflicts2) {
+            var conflict2 = conflicts2[c2];
 
-        var finalgrant = finalgrant || (grant1 && grant2);
-        var finalconditional = finalgrant && (finalconditional || conditional1 || conditional2);
+            if(conflict2.locks)
+                conflicts = conflicts.concat(conflict2.locks);
+            else if(conflict2.entity)
+                conflicts.push({ type : conflict2.entity.type });
 
-        if(result.length) {
-            return { result : finalgrant, conditional : finalconditional, evals : result };
-        } else {
-            return { result : finalgrant, conditional : finalconditional };
+            // only one lock set needs to be open
+            grant2 = grant2 || conflict2.allopen;
+
+            if(conflict2.allopen) {
+                conditional2 = conditional2 && conflict2.conditional;
+            }
         }
-    }
+
+        // TODO - Postprocess conflicts and reduce where possible (lub?)
+
+        conditional1 = grant1 && conditional1;
+        conditional2 = grant2 && conditional2;
+
+        finalgrant = grant1 && grant2;
+        finalconditional = finalgrant && (conditional1 || conditional2);
+
+        // console.log("\tResult of merge: "+JSON.stringify({result : finalgrant, conditional : finalconditional, conflicts : conflicts}));
+
+        if(finalconditional)
+            return { result : true, conditional : true, conflicts : conflicts };
+        else {
+            if(finalgrant)
+                return { result : true, conditional : false };
+            else
+                return { result : false, conditional : false, conflicts : conflicts };
+        }
+    };
 
     var cls = function(flows, entity) {
         this.entity = null;
@@ -422,16 +341,15 @@ var Policy = (function() {
         // context.subject is the message itself (this is the corresponding policy)
         // context.object is the target
         checkIncoming : function(targetPolicy, context) {
-            var dataPolicy = this;
+            var dataPolicy = new Policy(this);
             var dresult = []; // the eval result for the item coming entering
             var eresult = []; // the eval result for the entity where data enters
 
-            /* console.log("=========== CHECKFLOW ===========");
+            /* console.log("=========== CHECKINCOMING ===========");
             console.log("trgPolicy: " + targetPolicy);
-            console.log("dataPolicy: " + dataPolicy); 
+            console.log("dataPolicy: " + dataPolicy);
             if(context && context.locks)
                 console.log("context: "+JSON.stringify(context.locks, null, 2)); */
-             
 
             // First verify whether the data policy allows the
             // flow into the target/this node
@@ -447,16 +365,18 @@ var Policy = (function() {
                 // the target in the flow allows the flow to target
                 if(flow.target.dominates(targetPolicy.entity)) {
                     var conflicts = flow.getClosedLocks(context);
-                    // console.log("\t\t1 CONFLICTS: "+JSON.stringify(conflicts));
+                    // console.log("\t\t*1 CONFLICTS: ",conflicts);
                     dresult.push(conflicts);
                 } else {
                     // console.log("NO DOMINATION for "+flow.target+" and "+targetPolicy.entity);
-                    // var toPush = { ids : [ flow.id ], allopen : false, conditional : false, entity : flow.target };
                     var toPush = { allopen : false, conditional : false, entity : flow.target };
-                    // console.log("\t\t1 ENTITY CONFLICT("+flow.id+"): "+flow.target);
+                    // console.log("\t\t1 ENTITY CONFLICT: " + flow.target);
                     dresult.push(toPush);
                 }
             }
+
+            // console.log();
+            // console.log("-- check whether node policy accepts message");
 
             // Second, verify whether the node policy of the
             // node receiving data allows the data to enter the node
@@ -466,20 +386,20 @@ var Policy = (function() {
                     continue;
 
                 var flow = targetPolicy.flows[f];
-
                 var invContext = null;
                 if(context)
-                    invContext = new Context({ subject : context.object, object : context.subject, locks : context.locks });
+                    invContext = new Context(context);
 
+                // console.log("+ get lock states for flow "+flow);
                 var conflicts = flow.getClosedLocks(invContext);
-                // console.log("\t\t2 CONFLICTS: "+JSON.stringify(conflicts));
+                // console.log("\t\t*2 CONFLICTS: ",conflicts);
                 eresult.push(conflicts);
             }
 
             // console.log("DRESULT: "+JSON.stringify(dresult));
             // console.log("ERESULT: "+JSON.stringify(eresult));
 
-            return mergeConflicts(dresult, eresult);
+            return processConflicts(dresult, eresult);
         },
 
         checkOutgoing : function(sourcePolicy, context) {
@@ -509,7 +429,7 @@ var Policy = (function() {
              console.log("DRESULT: "+JSON.stringify(dresult));
              console.log("ERESULT: "+JSON.stringify(eresult));*/
 
-            return mergeConflicts(dresult, eresult);
+            return processConflicts(dresult, eresult);
         },
 
 
@@ -522,13 +442,13 @@ var Policy = (function() {
         checkFlow : function(srctrgPolicy, direction, context) {
             var result = { result : false, conditional : false };
 
-            
+
             /* console.log("====================== CHECKFLOW =======================");
             console.log("srctrgPolicy: "+JSON.stringify(srctrgPolicy));
             console.log("direction: "+JSON.stringify(direction));
             if(context.locks)
             console.log("context: "+JSON.stringify(context.locks));*/
-            
+
 
             if(!srctrgPolicy || !direction) {
                 return result;
@@ -595,19 +515,19 @@ var Policy = (function() {
             var conditional = true;
 
 
-            /* 
+            /*
              console.log("============ checkWriteAccess ============");
              console.log("\tCheck write to target");
-             
+
              console.log("\t\tTARGET: "+this);
-             console.log("\t\tWRITER: "+writer); 
+             console.log("\t\tWRITER: "+writer);
 
              if(context && context.subject.data) {
              console.log("\t\tcontext.subject: "+context.subject.data.id);
              console.log("\t\tcontext.object: "+context.object.data.id);
              }
              */
-             
+
 
             // check whether the writer can write to *this*
             for(var f in this.flows) {
@@ -753,49 +673,19 @@ var Policy = (function() {
             // this policy defines no flow, i.e. it is the top policy
             if(this.flows.length == 0)
                 return false;
-            else 
+            else
                 // the other policy defines no flow, i.e. it is the top policy
                 // it will always be more restrictive than the other policy
                 if(otherPol.flows.length == 0)
                     return true;
 
-            var cmpF1 = false;
-            var cmpF2 = false;
-            for(var f1 in this.flows) {
-                var flow1 = this.flows[f1];   
-                if(flow1[srctrg]) {
-                    cmpF1 = true;
-                    for(var f2 in otherPol.flows) {
-                        var flow2 = otherPol.flows[f2];
-                        
-                        if(flow2[srctrg]) {
-                            cmpF2 = true;
-                            if(!flow1.le(flow2)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
+            var flows1 = this.flows.filter(function(f) { return f[srctrg] != undefined || f[srctrg] != null; } );
+            var flows2 = otherPol.flows.filter(function(f) { return f[srctrg] != undefined || f[srctrg] != null; } );
 
-            // same as length conditions but there were
-            // flows which were not comparable
-            if(!cmpF1)
-                return false;
-            else 
-                if(!cmpF2)
-                    return true;
-
-            return true;
-
-
-            // iterate through all flows in this policy
-            for(var f1 in this.flows) {
-                var flow1 = this.flows[f1];
-
-                for(var f2 in otherPol.flows) {
-                    var flow2 = otherPol.flows[f2];
-
+            for(var f1 in flows1) {
+                var flow1 = flows1[f1];
+                for(var f2 in flows2) {
+                    var flow2 = flows2[f2];
                     if(flow1.le(flow2)) {
                         covered1[f1] = true;
                         covered2[f2] = true;
@@ -803,16 +693,12 @@ var Policy = (function() {
                 }
             }
 
-            /* for(var f1 in this.flows)
-             if(!covered1[f1]) {
-             complies = false;
-             console.log("Conflict in flow 1: " + this.flows[f1]);
-             }*/
-
-            for(var f2 in otherPol.flows)
-                if(!covered2[f2]) {
+            // if all flows have a less restrictive equivalent in this policy
+            // this policy is in fact smaller
+            for(f2 in flows2)
+                if(covered2[f2] != true) {
                     complies = false;
-                    // console.log("Conflict in flow 2: " + otherPol.flows[f2]);
+                    break;
                 }
 
             return complies;
@@ -974,16 +860,13 @@ var Policy = (function() {
 })();
 
 Policy.createMessageArray = function(msg) {
-    console.log("createMessageArray: "+msg.type);
     if (msg.type == 'normal') {
 
         // if top level element is array user intended the object to be send to
         // different locations
         if (msg.value.value !== null && msg.value.value.Class === 'Array') {
             var resultArray = [];
-            console.log("RECOGNIZED ARRAY");
 
-            console.log("SIZE OF ARRAY: "+msg.value.value.properties.length);
             for (var i = 0; i < msg.value.value.properties.length; i++) {
                 if (msg.value.value.properties[i] !== null) {
 
@@ -1001,11 +884,11 @@ Policy.createMessageArray = function(msg) {
 
                                 // When this shell is created in jsFlow the default policy is set
                                 shell.value.label.policy = clone(msg.value.label.policy);
-                                console.log("POLICY OF SUBARRAY: %j", msg.value.label.policy);
+                                // console.log("POLICY OF SUBARRAY: %j", msg.value.label.policy);
 
                                 // msg.value.value.properties[i] is the complete msg object
                                 shell.value.value = msg.value.value.properties[i].properties[j];
-                                console.log("POLICY OF SUBARRAY: %j", shell.value.value);
+                                // console.log("POLICY OF SUBARRAY: %j", shell.value.value);
 
                                 subResultArray[j] = shell;
                             } else {
@@ -1296,15 +1179,18 @@ var removeArrayPolicy = function(obj) {
 //of the obj without policies.
 Policy.mergePolicyObjWithObj = function(objWithPolicy, obj) {
 
+		var objWithPolicyClone = clone(objWithPolicy);
+		var objClone = clone(obj);
+
     //TODO better check with object Constructor
-    if(objWithPolicy.type == 'normal' && obj.type != "normal"){
-        deletePropertiesFromObjWithPolicy(objWithPolicy.value.value, obj);
-        setPolicyObjWithObj(objWithPolicy.value.value, obj);
+    if(objWithPolicyClone.type == 'normal' && objClone.type != "normal"){
+        deletePropertiesFromObjWithPolicy(objWithPolicyClone.value.value, objClone);
+        setPolicyObjWithObj(objWithPolicyClone.value.value, objClone);
     } else {
         throw new Error("Error: Can only merge a obj with policies with a obj without policies");
     }
 
-    return objWithPolicy;
+    return objWithPolicyClone;
 }
 
 
@@ -1434,24 +1320,37 @@ function adaptPropertyPolicy(obj){
 }
 
 //Iterate over all policies of the object an set the lub of the current policy and the given policy.
+//The entity of the policy object is set to null.
 Policy.PolicyObjlubWithPolicy = function(objWithPolicy, policy){
+
+	var objWithPolicyClone = clone(objWithPolicy);
+	var policyClone = clone(policy);
+
 	if(objWithPolicy.type == "normal"){
-			objWithPolicy.value.label.policy = objWithPolicy.value.label.policy.lub(policy);
-			 policyObjlubWithPolicyHelper(objWithPolicy.value.value, policy);
+			var objPolicy = new Policy(objWithPolicyClone.value.label.policy);
+
+			objPolicy.entity = null;
+			policyClone.entity = null;
+
+			objWithPolicyClone.value.label.policy = objPolicy.lub(policyClone);
+			policyObjlubWithPolicyHelper(objWithPolicyClone.value.value, policy);
 	} else {
 			throw new Error("Error: Expected an object with policies");
 	}
-	return objWithPolicy;
+
+	return objWithPolicyClone;
 }
 
 function policyObjlubWithPolicyHelper(obj, policy){
 		for(var prop in obj.properties){
-			  if((typeof obj.properties[prop] == 'array' || typeof obj.properties[prop] == 'object') && obj.properties[prop] != null){
-					obj.labels[prop].value.policy = obj.labels[prop].value.policy.lub(policy);
-					policyObjlubWithPolicyHelper(obj.properties[prop], policy);
+				var objPolicy = new Policy(obj.labels[prop].value.policy);
 
-				}else{
-					obj.labels[prop].value.policy = obj.labels[prop].value.policy.lub(policy);
+				objPolicy.entity = null;
+
+				obj.labels[prop].value.policy = objPolicy.lub(policy);
+
+			  if((typeof obj.properties[prop] == 'array' || typeof obj.properties[prop] == 'object') && obj.properties[prop] != null){
+					policyObjlubWithPolicyHelper(obj.properties[prop], policy);
 				}
 		}
 }
@@ -1586,7 +1485,7 @@ function setPolicyAtPathHelper(obj, path, policy){
 
 //Iterate an object with policies. Executes the given function with the
 //current property, policy for this property, and the path to this property
-Policy.iterateṔolicyObj = function(objWithPolicy, func){
+Policy.iteratePolicyObj = function(objWithPolicy, func){
 	if(objWithPolicy.type == "normal"){
 		var obj = clone(objWithPolicy);
 		func("", obj.value.label.policy, "");
@@ -1610,7 +1509,53 @@ function iteratePolicyObjHelper(obj, func, path){
 	}
 }
 
-//Sets the given property and policy according to the given path in the given policy object
+//Remove the property including its policy at the given path
+Policy.removePropertyAtPath = function(objWithPolicy, path){
+
+	if(objWithPolicy.type == "normal"){
+
+		var obj = clone(objWithPolicy);
+		path = path.replace(/\[(\w+)\]/g, '.$1');
+		var pathArray = [];
+
+		if(path != ""){
+			pathArray = path.split(".");
+		}
+
+		if(pathArray.length < 1){
+			obj = undefined;
+		}else{
+			removePropertyAtPathHelper(obj.value.value, pathArray);
+		}
+	} else {
+		throw new Error("Error: Expected an object with policies");
+	}
+
+	return obj;
+}
+
+function removePropertyAtPathHelper(obj, path){
+	var len = path.length;
+
+	for(var i = 0; i < len; i++){
+		var prop = path[i];
+		if(prop in obj.properties){
+			if(i == len - 1){
+				delete obj.properties[prop];
+				delete obj.labels[prop];
+			} else {
+				obj = obj.properties[prop];
+			}
+
+		} else {
+			throw new Error("Error: Path not found in given object");
+		}
+	}
+		return obj;
+}
+
+//Sets the given property with policy in the given object according to the path.
+//If no path is provided create a new policy object with the property and policy.
 Policy.setPropertyAtPath = function(objWithPolicy, path, property, policy){
 
 	if(objWithPolicy.type == "normal"){
@@ -1624,10 +1569,9 @@ Policy.setPropertyAtPath = function(objWithPolicy, path, property, policy){
 		}
 
 		if(pathArray.length < 1){
-			obj = Policy.setPolicy(property, Policy.bot());
-
+			obj = Policy.setPolicy(porperty, policy);
 		}else{
-			setPropertyAtPathHelper(obj.value.value, pathArray,property, policy);
+			setPropertyAtPathHelper(obj.value.value, pathArray, property, policy);
 		}
 	} else {
 		throw new Error("Error: Expected an object with policies");
@@ -1637,21 +1581,35 @@ Policy.setPropertyAtPath = function(objWithPolicy, path, property, policy){
 }
 
 function setPropertyAtPathHelper(obj, path, property, policy){
+
 	var len = path.length;
 
 	for(var i = 0; i < len; i++){
 		var prop = path[i];
-		if(prop in obj.properties){
+
 			if(i == len - 1){
-				obj.properties[path[i]] = Policy.setPolicy(property, Policy.bot());
-				obj.labels[path[i]].value.policy = policy;
+				obj.labels[prop] = { value : { policy : policy}};
+
+
+				if (property instanceof Array) {
+			  	var subArray = new policySubArray(policy);
+					createPolicyObject(property, subArray, policy);
+
+					obj.properties[prop] = subArray;
+
+				} else if (property instanceof Object) {
+					var subObj = new policySubObject();
+					createPolicyObject(property, subObj, policy);
+
+					obj.properties[prop] = subObj;
+
+				} else {
+					obj.properties[prop] = property;
+				}
+
 			} else {
 				obj = obj.properties[path[i]];
 			}
-
-		} else {
-			throw new Error("Error: Path not found in given object");
-		}
 	}
 		return obj;
 }
