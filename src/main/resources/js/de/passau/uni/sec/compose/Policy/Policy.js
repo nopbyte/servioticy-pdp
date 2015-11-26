@@ -291,7 +291,7 @@ var Policy = (function() {
                     // number of flows added (if locks are equal and
                     // entity dominates the other, the policy does
                     // not need to be added!
-                    if(!flow[srctrg].eq(newFlow[srctrg]))
+                    if(!flow.eq(newFlow))
                         continue;
 
                     if(!flow.locks && newFlow.locks || flow.locks && !newFlow.locks || !flow.locks && !newFlow.locks)
