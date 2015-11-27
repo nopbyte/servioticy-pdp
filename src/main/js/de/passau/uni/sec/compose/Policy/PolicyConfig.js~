@@ -1,8 +1,0 @@
-var PolicyConfig = {
-  rootDir : "",
-  lockDir : "./Locks/"
-}
-
-if(global){
-  module.exports = PolicyConfig;
-}

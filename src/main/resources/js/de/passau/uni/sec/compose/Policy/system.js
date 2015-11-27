@@ -14,7 +14,7 @@ system.inherits = function(ctor, superCtor) {
     });
 }
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     module.exports = system;
 } else {
 		var console = {};

@@ -16,7 +16,7 @@
 
 "use strict";
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./../PolicyConfig.js");
     var Lock = require(PolicyConfig.rootDir + "./../Lock.js");
     var system = require(PolicyConfig.rootDir + "./../system.js");
@@ -130,5 +130,5 @@ TimePeriodLock.prototype.lub = function(lock) {
     return new TimePeriodLock({ path : 'inTimePeriod', args : [ snewStart, snewEnd] });
 }
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = TimePeriodLock;

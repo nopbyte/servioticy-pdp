@@ -281,8 +281,13 @@ public class AuthorizationServioticy
 		String userId;
 		try {
 			userInfo = getUserInfoIDM(idmUser, idmPass, idmHost, idmPort, accessToken);
-			userId = userInfo.findValue(IDM_USER_SECTION).toString();
-		} catch (PDPServioticyException e) {
+			if (userInfo != null){
+				userId = userInfo.findValue(IDM_USER_SECTION).toString();
+			} else {
+				ret.setPermission(false);
+				return ret;
+			}
+		} catch (Exception e) {
 			userInfo = null;
 			ret.setPermission(false);
 			return ret;
@@ -312,8 +317,13 @@ public class AuthorizationServioticy
 		String userId;
 		try {
 			userInfo = getUserInfoIDM(idmUser, idmPass, idmHost, idmPort, accessToken);
-			userId = userInfo.findValue(IDM_USER_SECTION).toString();
-		} catch (PDPServioticyException e) {
+			if (userInfo != null){
+				userId = userInfo.findValue(IDM_USER_SECTION).toString();
+			} else {
+				ret.setPermission(false);
+				return ret;
+			}				
+		} catch (Exception e) {
 			userInfo = null;
 			ret.setPermission(false);
 			return ret;

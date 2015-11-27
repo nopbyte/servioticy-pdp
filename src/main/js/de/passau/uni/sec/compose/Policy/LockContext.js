@@ -1,3 +1,0 @@
-/* LockContext() {
-    this.inRuntime = false;
-};*/

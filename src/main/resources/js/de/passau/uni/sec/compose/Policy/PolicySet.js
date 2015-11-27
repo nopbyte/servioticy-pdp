@@ -18,7 +18,7 @@
 
 // # PolicySet Class
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./PolicyConfig.js");
     var Policy = require(PolicyConfig.rootDir + "./Policy.js");
     var Flow = require(PolicyConfig.rootDir + "./Flow.js");
@@ -228,5 +228,5 @@ var PolicySet = (function() {
     return cls;
 })();
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = PolicySet;

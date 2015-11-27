@@ -1,6 +1,6 @@
 "use strict";
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./../PolicyConfig.js");
     var Lock = require(PolicyConfig.rootDir + "./../Lock.js");
     var system = require(PolicyConfig.rootDir + "./../system.js");
@@ -36,5 +36,5 @@ ClosedLock.prototype.toString = function(lock) {
     return "[[ closed ]]";
 }
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = ClosedLock;

@@ -16,7 +16,7 @@
 
 "use strict";
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./../PolicyConfig.js");
     var Entity = require(PolicyConfig.rootDir + "./../Entity.js");
     var Lock = require(PolicyConfig.rootDir + "./../Lock.js");
@@ -86,5 +86,5 @@ IsEqLock.prototype.compile2PolicyEval = function() {
     return v1 + " == " + v2;
 }
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = IsEqLock;

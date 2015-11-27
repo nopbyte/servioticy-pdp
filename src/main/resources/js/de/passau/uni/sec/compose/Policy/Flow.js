@@ -16,7 +16,7 @@
 
 "use strict";
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./PolicyConfig.js");
     var Lock = require(PolicyConfig.rootDir + "./Lock.js");
     var Entity = require(PolicyConfig.rootDir + "./Entity.js");
@@ -381,5 +381,5 @@ var Flow = (function() {
     return cls;
 })();
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = Flow;

@@ -167,5 +167,5 @@ var Entity = (function() {
     return cls;
 })();
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = Entity;

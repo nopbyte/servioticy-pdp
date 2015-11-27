@@ -16,7 +16,7 @@
 
 "use strict";
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
     var PolicyConfig = require("./PolicyConfig");
     var Entity = require(PolicyConfig.rootDir + "./Entity.js");
 }
@@ -119,7 +119,7 @@ Lock.registerLock = function (type, constructor) {
 // TODO: This static method should be replaced by a version which can
 // automaticall load locks from a directory. For now, all locks are registered manually
 Lock.initLocks = function() {
-    if(global && typeof print !== "function") {                
+    if(typeof print !== "function") {                
         // at some point the directory should also be read automatically
         // all Locks which should be available
 
@@ -351,5 +351,5 @@ Lock.prototype = {
     }
 };
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = Lock;

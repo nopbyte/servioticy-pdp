@@ -134,5 +134,5 @@ Context.prototype.addLockState = function(lock, subject, value) {
     states[strArg] = value;
 };
 
-if(global && typeof print !== "function")
+if(typeof print !== "function")
     module.exports = Context;

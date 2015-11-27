@@ -1,10 +1,11 @@
 Lock.lockConstructors = [];
 //Lock.registerLock("inTimePeriod", TimePeriodLock);
 Lock.registerLock("isUser", UserLock);
+Lock.registerLock("inGroup", GroupLock);
 Lock.registerLock("hasID", HasIDLock);
 Lock.registerLock("actsFor", ActsForLock);
 Lock.registerLock("closed", ClosedLock);
-Lock.registerLock("open", OpenLock);
+//Lock.registerLock("open", OpenLock);
 
 var pSO;
 var pSU;

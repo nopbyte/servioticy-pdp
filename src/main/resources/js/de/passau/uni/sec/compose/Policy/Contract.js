@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
 	var PolicyConfig = require("./PolicyConfig.js");
     var ContractFlow = require(PolicyConfig.rootDir + "./ContractFlow.js");
     var Lock = require(PolicyConfig.rootDir + "./Lock.js");
@@ -169,7 +169,7 @@ var getContract = function(node) {
 }
 
 
-if(global && typeof print !== "function") {
+if(typeof print !== "function") {
 		module.exports = Contract;
 }
 

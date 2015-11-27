@@ -3,6 +3,6 @@ var PolicyConfig = {
   lockDir : "./Locks/"
 }
 
-if(global && typeof print !== "function"){
+if(typeof print !== "function"){
   module.exports = PolicyConfig;
 }
