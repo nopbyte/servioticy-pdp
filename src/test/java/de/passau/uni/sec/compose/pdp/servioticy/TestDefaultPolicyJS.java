@@ -77,6 +77,29 @@ public class TestDefaultPolicyJS {
 			}	
 	 }
 	 
+	 
+	 @Test
+	 public  void publicSuAllowSpecificSO() throws PDPServioticyException
+	 {
+		 	System.out.println("publicSOpublicSU");
+		  	boolean ret;
+			try {
+				// Generate input
+				String token=UUID.randomUUID().toString();
+				JsonNode so_data = buildJsonSoMetadataPublic(token);
+				JsonNode su_data = buildJsonSuMetadataPublic(); // changes the user id
+				// Get initial provenance
+				System.out.println("SO: " + so_data);
+				System.out.println("SU: " + su_data);
+				ret = pdp.checkFlow(so_data, su_data, "weather");
+				//ret = ServioticyProvenance.getInitialProvenance(so_data);
+				// Check the result of the policy evaluation
+				assertEquals(true, ret);
+			} catch (IOException e) {
+				fail();
+			}	
+	 }
+	 
 	 @Test
 	 public  void publicSUuserX() throws PDPServioticyException
 	 {
@@ -234,6 +257,54 @@ public class TestDefaultPolicyJS {
 				//ret = ServioticyProvenance.getInitialProvenance(so_data);
 				// Check the result of the policy evaluation
 				assertEquals(true, ret);
+			} catch (IOException e) {
+				fail();
+			}	
+	 }
+	 
+	 @Test
+	 public  void vagrantSetStreamOTPtrue() throws PDPServioticyException
+	 {
+		 	System.out.println("vagrantSetScreamOTPtrue");
+		  	boolean ret;
+			try {
+				// Generate input
+			    ObjectMapper mapper = new ObjectMapper();
+				String token=UUID.randomUUID().toString();
+				String so_dataS = "{\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\",\"lastModified\":1448376089000,\"owner_id\":\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\",\"api_token\":\"gSb6wqT8K9SU2kUth9tSyoKbba43YYSI1GsXaL\",\"policy\":[{\"entity\":{\"type\":\"so\",\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\"},\"flows\":[{\"source\":{\"type\":\"user\"},\"target\":null,\"locks\":[{\"path\":\"isUser\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":{\"type\":\"any\"},\"target\":null,\"locks\":[{\"path\":\"actsFor\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":null,\"target\":{\"type\":\"user\"},\"locks\":[{\"path\":\"isUser\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":null,\"target\":{\"type\":\"any\"},\"locks\":[{\"path\":\"actsFor\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]}]},{\"object\":{\"type\":\"so\",\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\",\"stream\":\"weather\"},\"flows\":[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]}],\"reputation\":5,\"data_provenance_collection\":true,\"payment\":false}";
+				JsonNode so_data = mapper.readTree(so_dataS);
+				String userInfoS = "{\"id\":\"6603691f-6fc5-495b-81d5-ec9eb2a9648X\",\"username\":\"test2\",\"lastModified\":1447939369000}";
+				JsonNode userInfo = mapper.readTree(userInfoS);
+				// Get initial provenance
+				System.out.println("SU: " + so_data);
+				ret = pdp.checkWriteAccess(so_data, "6603691f-6fc5-495b-81d5-ec9eb2a9648X", userInfo, "weather"); 
+				//ret = ServioticyProvenance.getInitialProvenance(so_data);
+				// Check the result of the policy evaluation
+				assertEquals(true, ret);
+			} catch (IOException e) {
+				fail();
+			}	
+	 }
+	 
+	 @Test
+	 public  void vagrantSetStreamOTPfalse() throws PDPServioticyException
+	 {
+		 	System.out.println("vagrantSetScreamOTPfalse");
+		  	boolean ret;
+			try {
+				// Generate input
+			    ObjectMapper mapper = new ObjectMapper();
+				String token=UUID.randomUUID().toString();
+				String so_dataS = "{\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\",\"lastModified\":1448376089000,\"owner_id\":\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\",\"api_token\":\"gSb6wqT8K9SU2kUth9tSyoKbba43YYSI1GsXaL\",\"policy\":[{\"entity\":{\"type\":\"so\",\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\"},\"flows\":[{\"source\":{\"type\":\"user\"},\"target\":null,\"locks\":[{\"path\":\"isUser\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":{\"type\":\"any\"},\"target\":null,\"locks\":[{\"path\":\"actsFor\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":null,\"target\":{\"type\":\"user\"},\"locks\":[{\"path\":\"isUser\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]},{\"source\":null,\"target\":{\"type\":\"any\"},\"locks\":[{\"path\":\"actsFor\",\"args\":[\"6603691f-6fc5-495b-81d5-ec9eb2a9648c\"],\"not\":false}]}]},{\"object\":{\"type\":\"so\",\"id\":\"144848004447043dfd1f633c541d087db898766ac13ae\",\"stream\":\"weather\"},\"flows\":[{\"source\":{\"type\":\"any\"}},{\"target\":{\"type\":\"any\"}}]}],\"reputation\":5,\"data_provenance_collection\":true,\"payment\":false}";
+				JsonNode so_data = mapper.readTree(so_dataS);
+				String userInfoS = "{\"id\":\"6603691f-6fc5-495b-81d5-ec9eb2a9648X\",\"username\":\"test2\",\"lastModified\":1447939369000}";
+				JsonNode userInfo = mapper.readTree(userInfoS);
+				// Get initial provenance
+				System.out.println("SU: " + so_data);
+				ret = pdp.checkWriteAccess(so_data, "6603691f-6fc5-495b-81d5-ec9eb2a9648X", userInfo, "weatherX"); 
+				//ret = ServioticyProvenance.getInitialProvenance(so_data);
+				// Check the result of the policy evaluation
+				assertEquals(false, ret);
 			} catch (IOException e) {
 				fail();
 			}	

@@ -331,7 +331,7 @@ public class AuthorizationServioticy
 	
 	public PermissionCacheObject genericPublicPrivatePolicyNoIDM(JsonNode SU, PermissionCacheObject cache)
 	{
-		System.out.println("PDP SubSub: " + SU);
+		//System.out.println("PDP SubSub: " + SU);
 		PermissionCacheObject ret = new PermissionCacheObject();
 		ret.setPermission(false);
 		// Get user id
@@ -339,7 +339,7 @@ public class AuthorizationServioticy
 		userId = cache.getUserId();
 		JsonNode userInfo = cache.getUserInfo();
 		if (userInfo == null){
-			System.out.println("PDP SubSub user info null");
+			//System.out.println("PDP SubSub user info null");
 		    String string = "{\"id\":\"" + userId + "\"}";
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
@@ -353,9 +353,9 @@ public class AuthorizationServioticy
 		// Evaluate policy
 		if(userId!=null && userInfo != null)
 		{
-		   System.out.println("PDP SubSub call JS eval:  " + userId + " " + userInfo);
+		   //System.out.println("PDP SubSub call JS eval:  " + userId + " " + userInfo);
 		   ret.setPermission(pdp.checkAccess(SU,userId, userInfo));
-		   System.out.println("PDP SubSub call JS eval ret:  " + ret.isPermission());
+		   System.out.println("PDP SubSub call JS eval ret:  " + userId + " " + userInfo + " " + ret.isPermission());
 
 		}
 		return ret;

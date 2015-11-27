@@ -69,7 +69,7 @@ public class PolicyEvaluation {
 	public PolicyEvaluation() {
 		System.out.println("INIT PDP-JS");
 		String currentJsCode = "";
-		String fileList[] = {"Flow.js", "system.js", "PolicyConfig.js", "PolicySet.js", "Policy.js", "ContractFlow.js", "Lock.js", "LockContext.js", "Context.js", "Entity.js", "Contract.js", "Locks/TimePeriodLock.js", "Locks/Closed.js", "Locks/IsEqLock.js", "Locks/IsEq.js", "Locks/GroupLock.js", "Locks/HasIDLock.js", "Locks/UserLock.js", "Locks/IsLtLock.js", "Locks/ActsForLock.js","postLoadInit.js"};
+		String fileList[] = {"Flow.js", "system.js", "PolicyConfig.js", "PolicySet.js", "Policy.js", "ContractFlow.js", "Lock.js", "LockContext.js", "Context.js", "Entity.js", "Contract.js", "Locks/TimePeriodLock.js", "Locks/Closed.js", "Locks/IsEqLock.js", "Locks/IsEq.js", "Locks/GroupLock.js", "Locks/ReputationLockGt.js", "Locks/ReputationLockLt.js", "Locks/HasIDLock.js", "Locks/UserLock.js", "Locks/IsLtLock.js", "Locks/ActsForLock.js","postLoadInit.js"};
 		String path = "/js/de/passau/uni/sec/compose/Policy/";
 
 		for (int i = 0; i < fileList.length; i++){

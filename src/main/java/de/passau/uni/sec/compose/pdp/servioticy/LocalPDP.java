@@ -211,7 +211,7 @@ public class LocalPDP implements PDP
 				if(!authz.evaluatePolicy(u, security_metadata_SO_current, stream))
 						throw new PDPServioticyException(403, "user" +u.getId()+" cannot send data to this Service Object", "user" +u.getId()+" cannot send data to this Service Object");
 				 try{
-					((Map<String, Object>) pco.getCache()).put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream));
+					((Map<String, Object>) pco.getCache()).put("SecurityMetaData", ServioticyProvenance.getInitialProvenance(security_metadata_SO_current, stream, u));
 				} catch (Exception e) {
 					throw new PDPServioticyException(400, "The parameters for SendDataToServiceObjectProv were wrong. ", "Wrong parameters");
 				    
